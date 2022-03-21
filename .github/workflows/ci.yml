@@ -6,6 +6,9 @@ on:
   pull_request:
     branches: ["*"]
 
+env:
+  PG_VERSION: REL_12_7
+
 jobs:
   build:
     name: CI
@@ -31,10 +34,9 @@ jobs:
 
       - name: Setup for examples
         run: |
-          git submodule update --init
-
-          BASE=$PWD
-
+          curl -Lo postgres.zip https://github.com/postgres/postgres/archive/refs/tags/$PG_VERSION.zip
+          unzip postgres.zip
+          mv postgres-$PG_VERSION postgres
           cd postgres && ./configure
 
       - name: CI 
