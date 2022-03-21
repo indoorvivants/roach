@@ -11,7 +11,7 @@ import bindgen.interface.*
 lazy val roach =
   project
     .in(file("."))
-    .enablePlugins(ScalaNativePlugin, BindgenPlugin)
+    .enablePlugins(ScalaNativePlugin, ScalaNativeJUnitPlugin, BindgenPlugin)
     .settings(
       organization := "com.indoorvivants.roach",
       moduleName := "core",
@@ -36,11 +36,8 @@ lazy val roach =
           )
         )
       },
-      nativeConfig ~= { conf =>
-        conf.withLinkingOptions(
-          conf.linkingOptions ++ postgresLib.toList.map("-L" + _)
-        )
-      },
+      libraryDependencies += "com.eed3si9n.verify" %%% "verify" % "1.0.0" % Test,
+      testFrameworks += new TestFramework("verify.runner.Framework"),
       Compile / packageSrc / mappings ++= {
         val base = (Compile / sourceManaged).value
         val files = (Compile / managedSources).value

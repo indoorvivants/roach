@@ -39,6 +39,8 @@ jobs:
           unzip postgres.zip 2>&1 > /dev/null
           mv postgres-$PG_VERSION postgres
           cd postgres && ./configure
+          sudo apt install -y libpq-dev libpq
+          docker run -p 5432:5432 -e POSTGRES_PASSWORD=mysecretpassword -d postgres
 
       - name: CI 
         run: sbt test publishLocal
