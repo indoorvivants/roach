@@ -38,8 +38,6 @@ jobs:
           curl -Lo postgres.zip https://github.com/postgres/postgres/archive/refs/tags/$PG_VERSION.zip
           unzip postgres.zip 2>&1 > /dev/null
           mv postgres-$PG_VERSION postgres
-          ls
-          ls postgres
           cd postgres && ./configure
 
       - name: CI 
