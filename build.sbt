@@ -17,6 +17,11 @@ lazy val roach =
       moduleName := "core",
       scalaVersion := Versions.Scala,
       resolvers += Resolver.sonatypeRepo("snapshots"),
+      // Scala 3 hack around the issue with docs
+      Compile / doc / scalacOptions ~= { opts =>
+        opts.filterNot(_.contains("-Xplugin"))
+      },
+      // end of Scala 3 hack around the issue with docs
       // Generate bindings to Postgres main API
       bindgenBindings += {
         val postgresIfaces =
