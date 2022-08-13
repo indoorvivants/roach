@@ -101,7 +101,6 @@ object Database:
       res
     else Right(conn)
 
-
   import Validated.*
   import Result.given
 
@@ -263,4 +262,3 @@ object Database:
       if db != null && PQstatus(db) == ConnStatusType.CONNECTION_OK then
         PQfinish(db)
 end Database
-
