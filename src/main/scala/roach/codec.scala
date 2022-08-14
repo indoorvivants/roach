@@ -153,4 +153,3 @@ object codecs:
 
   private def textual(nm: String) = stringLike[String](nm)(identity)
 end codecs
-

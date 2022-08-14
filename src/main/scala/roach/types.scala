@@ -33,4 +33,3 @@ object OidMapping extends OidMapping:
   inline override def rev(oid: Oid): String = mapping(oid)
 
 end OidMapping
-
