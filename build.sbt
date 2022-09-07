@@ -3,7 +3,7 @@ import java.nio.file.Paths
 Global / onChangedBuildSource := ReloadOnSourceChanges
 
 val Versions = new {
-  val Scala = "3.1.3"
+  val Scala = "3.2.0"
 }
 
 import bindgen.interface.*
