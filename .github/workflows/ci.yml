@@ -35,11 +35,6 @@ jobs:
       - name: Setup Postgres sources
         run: |
           set -e
-          curl -Lo postgres.zip https://github.com/postgres/postgres/archive/refs/tags/$PG_VERSION.zip
-          unzip postgres.zip 2>&1 > /dev/null
-          mv postgres-$PG_VERSION postgres
-          cd postgres && ./configure
-          sudo apt install -y libpq-dev libpq5
           docker run -p 5432:5432 -e POSTGRES_PASSWORD=mysecretpassword -d postgres
 
       - name: CI 
