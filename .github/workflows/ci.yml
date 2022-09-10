@@ -16,11 +16,24 @@ jobs:
       fail-fast: false
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
 
-      - uses: coursier/cache-action@v6      
+      - uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin' 
+          java-version: '17'
+          cache: sbt
 
-      - run: git fetch --unshallow
+      - name: Cache vcpkg
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/Library/Caches/sbt-vcpkg/vcpkg
+            ~/.cache/sbt-vcpkg/vcpkg
+            ~/.cache/sbt-vcpkg/vcpkg-install
+          key: ${{ runner.os }}-sbt-vcpkg
 
       - name: Setup for Scala Native
         run: |
@@ -32,14 +45,9 @@ jobs:
           sudo apt-get update 
           sudo apt-get install clang-13 lldb-13 libclang-13-dev llvm-13-dev
 
-      - name: Setup Postgres sources
+      - name: Setup Postgres
         run: |
           set -e
-          curl -Lo postgres.zip https://github.com/postgres/postgres/archive/refs/tags/$PG_VERSION.zip
-          unzip postgres.zip 2>&1 > /dev/null
-          mv postgres-$PG_VERSION postgres
-          cd postgres && ./configure
-          sudo apt install -y libpq-dev libpq5
           docker run -p 5432:5432 -e POSTGRES_PASSWORD=mysecretpassword -d postgres
 
       - name: CI 
