@@ -8,6 +8,7 @@ on:
 
 env:
   PG_VERSION: REL_12_7
+  SBTN: 'sbt --client'
 
 jobs:
   build:
@@ -49,6 +50,12 @@ jobs:
         run: |
           set -e
           docker run -p 5432:5432 -e POSTGRES_PASSWORD=mysecretpassword -d postgres
+
+      - name: WHAAAAT
+        run: $SBTN vcpkgInstall && ls -R ~/.cache/sbt-vcpkg/vcpkg/packages/ 
+
+      - name: WHAAAAT packages
+        run: ls -R ~/.cache/sbt-vcpkg/vcpkg-install 
 
       - name: CI 
         run: sbt test publishLocal
