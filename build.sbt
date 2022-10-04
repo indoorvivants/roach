@@ -21,12 +21,14 @@ lazy val roach =
       scalaVersion := Versions.Scala,
       vcpkgDependencies := Set("libpq"),
       bindgenBindings += {
+        val configurator = vcpkgConfigurator.value
+
         Binding(
-          vcpkgConfigurator.value.includes("libpq") / "libpq-fe.h",
+          configurator.includes("libpq") / "libpq-fe.h",
           "libpq",
           linkName = Some("pq"),
           cImports = List("libpq-fe.h"),
-          clangFlags = vcpkgConfigurator.value.pkgConfig
+          clangFlags = configurator.pkgConfig
             .updateCompilationFlags(List("-std=gnu99"), "libpq")
             .toList
         )
