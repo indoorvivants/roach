@@ -54,7 +54,10 @@ jobs:
       - name: WHAAAAT
         env: 
           VCPKG_ROOT: /home/runner/.cache/sbt-vcpkg/vcpkg/
-        run: $SBTN vcpkgInstall && ls -R ~/.cache/sbt-vcpkg/vcpkg/packages/ 
+        run: |
+          $SBTN vcpkgInstall  
+          ls -R ~/.cache/sbt-vcpkg/vcpkg/packages/ 
+          ls -R /usr/local/share/vcpkg/packages
 
       - name: WHAAAAT packages
         run: ls -R ~/.cache/sbt-vcpkg/vcpkg-install 
