@@ -52,6 +52,8 @@ jobs:
           docker run -p 5432:5432 -e POSTGRES_PASSWORD=mysecretpassword -d postgres
 
       - name: WHAAAAT
+        env: 
+          VCPKG_ROOT: /home/runner/.cache/sbt-vcpkg/vcpkg/
         run: $SBTN vcpkgInstall && ls -R ~/.cache/sbt-vcpkg/vcpkg/packages/ 
 
       - name: WHAAAAT packages
