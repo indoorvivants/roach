@@ -8,6 +8,7 @@ on:
 
 env:
   PG_VERSION: REL_12_7
+  SBTN: 'sbt --client'
 
 jobs:
   build:
@@ -30,10 +31,9 @@ jobs:
         uses: actions/cache@v3
         with:
           path: |
-            ~/Library/Caches/sbt-vcpkg/vcpkg
-            ~/.cache/sbt-vcpkg/vcpkg
+            ~/Library/Caches/sbt-vcpkg/vcpkg-install
             ~/.cache/sbt-vcpkg/vcpkg-install
-          key: ${{ runner.os }}-sbt-vcpkg
+          key: ${{ runner.os }}-sbt-vcpkg-new
 
       - name: Setup for Scala Native
         run: |
@@ -51,7 +51,7 @@ jobs:
           docker run -p 5432:5432 -e POSTGRES_PASSWORD=mysecretpassword -d postgres
 
       - name: CI 
-        run: sbt test publishLocal
+        run: $SBTN 'test; publishLocal'
 
       - name: Publish ${{ github.ref }}
         if: startsWith(github.ref, 'refs/tags/v') || (github.ref == 'refs/heads/main')

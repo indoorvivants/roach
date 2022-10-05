@@ -21,12 +21,14 @@ lazy val roach =
       scalaVersion := Versions.Scala,
       vcpkgDependencies := Set("libpq"),
       bindgenBindings += {
+        val configurator = vcpkgConfigurator.value
+
         Binding(
-          vcpkgManager.value.includes("libpq") / "libpq-fe.h",
+          configurator.includes("libpq") / "libpq-fe.h",
           "libpq",
           linkName = Some("pq"),
           cImports = List("libpq-fe.h"),
-          clangFlags = vcpkgConfigurator.value
+          clangFlags = configurator.pkgConfig
             .updateCompilationFlags(List("-std=gnu99"), "libpq")
             .toList
         )
@@ -48,15 +50,17 @@ lazy val roach =
       }
     )
 
-def vcpkgNativeConfig(rename: String => String = identity, conf: Configuration = Compile) = Seq(
+def vcpkgNativeConfig(
+    rename: String => String = identity,
+    conf: Configuration = Compile
+) = Seq(
   conf / nativeConfig := {
     import com.indoorvivants.detective.Platform
     val configurator = vcpkgConfigurator.value
-    val manager = vcpkgManager.value
     val conf = nativeConfig.value
     val deps = vcpkgDependencies.value.toSeq.map(rename)
 
-    val files = deps.map(d => manager.files(d))
+    val files = deps.map(d => configurator.files(d))
 
     val compileArgsApprox = files.flatMap { f =>
       List("-I" + f.includeDir.toString)
@@ -69,7 +73,7 @@ def vcpkgNativeConfig(rename: String => String = identity, conf: Configuration =
 
     def updateLinkingFlags(current: Seq[String], deps: String*) =
       try {
-        configurator.updateLinkingFlags(
+        configurator.pkgConfig.updateLinkingFlags(
           Seq.empty,
           deps*
         ) ++ current
@@ -80,7 +84,7 @@ def vcpkgNativeConfig(rename: String => String = identity, conf: Configuration =
 
     def updateCompilationFlags(current: Seq[String], deps: String*) =
       try {
-        configurator.updateCompilationFlags(
+        configurator.pkgConfig.updateCompilationFlags(
           Seq.empty,
           deps*
         ) ++ current
