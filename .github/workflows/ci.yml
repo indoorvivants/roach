@@ -33,7 +33,7 @@ jobs:
           path: |
             ~/Library/Caches/sbt-vcpkg/vcpkg-install
             ~/.cache/sbt-vcpkg/vcpkg-install
-          key: ${{ runner.os }}-${{ env.VCPKG_ROOT }}-sbt-vcpkg
+          key: ${{ runner.os }}-sbt-vcpkg-new
 
       - name: Setup for Scala Native
         run: |
@@ -44,12 +44,6 @@ jobs:
           sudo add-apt-repository "deb http://apt.llvm.org/focal/     llvm-toolchain-focal-13   main"
           sudo apt-get update 
           sudo apt-get install clang-13 lldb-13 libclang-13-dev llvm-13-dev
-
-      # - name: whaaat
-      #   run: |
-      #     $SBTN vcpkgInstall 
-      #     ls -R $VCPKG_ROOT/packages
-      #     ls -R ~/.cache/sbt-vcpkg/vcpkg-install/x64-linux/
 
       - name: Setup Postgres
         run: |
