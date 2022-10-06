@@ -33,7 +33,7 @@ jobs:
           path: |
             ~/Library/Caches/sbt-vcpkg/vcpkg-install
             ~/.cache/sbt-vcpkg/vcpkg-install
-          key: ${{ runner.os }}-sbt-vcpkg-new
+          key: ${{ runner.os }}-sbt-vcpkg
 
       - name: Setup for Scala Native
         run: |
