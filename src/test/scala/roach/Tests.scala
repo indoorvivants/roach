@@ -7,7 +7,7 @@ import scala.scalanative.unsafe.Zone
 import scala.scalanative.unsigned.*
 import libpq.types.Oid
 
-object Tests extends verify.BasicTestSuite:
+class Tests extends munit.FunSuite:
   val connectionString =
     "postgresql://postgres:mysecretpassword@localhost:5432/postgres"
 
@@ -31,6 +31,67 @@ object Tests extends verify.BasicTestSuite:
           assert(retrieved(Oid(23.toUInt)) == "int4")
           assert(retrieved(Oid(1043.toUInt)) == "varchar")
         }
+      }
+    }
+  }
+
+  test("prepared") {
+    zone {
+      withDB { db ?=>
+        val single = db
+          .prepare(
+            "SELECT oid::int4, typname from pg_type where typname = $1",
+            "myq",
+            varchar
+          )
+          .getOrThrow
+
+        val multiple = db
+          .prepare(
+            "SELECT count(*) from pg_type where typname = $1 and oid::int4 = $2",
+            "multiple",
+            varchar ~ int4
+          )
+          .getOrThrow
+
+        assert(
+          single.execute("bool").getOrThrow.readAll(oid ~ name).toMap == Map(
+            Oid(16.toUInt) -> "bool"
+          )
+        )
+
+        assert(
+          single.execute("int4").getOrThrow.readAll(oid ~ name).toMap == Map(
+            Oid(23.toUInt) -> "int4"
+          )
+        )
+
+        assert(
+          single.execute("varchar").getOrThrow.readAll(oid ~ name).toMap == Map(
+            Oid(1043.toUInt) -> "varchar"
+          )
+        )
+
+        assert(
+          multiple
+            .execute("varchar" -> 1043)
+            .getOrThrow
+            .readOne(int8)
+            .contains(1L)
+        )
+        assert(
+          multiple.execute("bool" -> 16).getOrThrow.readOne(int8).contains(1L)
+        )
+        assert(
+          multiple.execute("int4" -> 23).getOrThrow.readOne(int8).contains(1L)
+        )
+        assert(
+          multiple
+            .execute("blablabla" -> 23)
+            .getOrThrow
+            .readOne(int8)
+            .contains(0L)
+        )
       }
     }
   }

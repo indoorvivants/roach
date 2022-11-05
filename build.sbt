@@ -1,9 +1,10 @@
+import bindgen.plugin.BindgenMode
 import java.nio.file.Paths
 
 Global / onChangedBuildSource := ReloadOnSourceChanges
 
 val Versions = new {
-  val Scala = "3.2.0"
+  val Scala = "3.2.1"
 }
 
 import bindgen.interface.*
@@ -41,8 +42,7 @@ lazy val roach =
       moduleName := "core",
       scalaVersion := Versions.Scala,
       resolvers += Resolver.sonatypeRepo("snapshots"),
-      libraryDependencies += "com.eed3si9n.verify" %%% "verify" % "1.0.0" % Test,
-      testFrameworks += new TestFramework("verify.runner.Framework"),
+      libraryDependencies += "org.scalameta" %%% "munit" % "1.0.0-M6" % Test,
       Compile / packageSrc / mappings ++= {
         val base = (Compile / sourceManaged).value
         val files = (Compile / managedSources).value

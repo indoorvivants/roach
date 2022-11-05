@@ -14,81 +14,6 @@ import scala.util.Try
 class RoachException(msg: String) extends Exception(msg)
 class RoachFatalException(msg: String) extends Exception(msg)
 
-opaque type Validated[A] = Either[String, A]
-object Validated:
-  extension [A](v: Validated[A])
-    inline def getOrThrow: A =
-      v match
-        case Left(err) => throw new RoachFatalException(err)
-        case Right(r)  => r
-    inline def either: Either[String, A] = v
-
-opaque type Result = Ptr[PGresult]
-object Result:
-  extension (r: Result)
-    inline def status: ExecStatusType = PQresultStatus(r)
-    def rows: (Vector[(Oid, String)], Vector[Vector[String]]) =
-      val nFields = PQnfields(r)
-      val nTuples = PQntuples(r)
-      val meta = Vector.newBuilder[(Oid, String)]
-      val tuples = Vector.newBuilder[Vector[String]]
-
-      // Read all the column names and their types
-      for i <- 0 until nFields do
-        meta.addOne(PQftype(r, i) -> fromCString(PQfname(r, i)))
-
-      // Read all the rows
-      for t <- 0 until nTuples
-      do
-        tuples.addOne(
-          (0 until nFields).map(f => fromCString(PQgetvalue(r, t, f))).toVector
-        )
-
-      meta.result -> tuples.result
-    end rows
-
-    def readOne[A](
-        codec: Codec[A]
-    )(using z: Zone): Option[A] = readAll(codec).headOption
-
-    def readAll[A](
-        codec: Codec[A]
-    )(using z: Zone, oids: OidMapping = OidMapping): Vector[A] =
-      val nFields = PQnfields(r)
-      val nTuples = PQntuples(r)
-      val tuples = Vector.newBuilder[A]
-
-      if (codec.length != PQnfields(r)) then
-        throw new RoachException(
-          s"Provided codec is for ${codec.length} fields, while the result has ${PQnfields(r)} fields"
-        )
-
-      (0 until nFields).foreach { offset =>
-        val expectedType = oids.rev(PQftype(r, offset))
-        val fieldName = fromCString(PQfname(r, offset))
-
-        if codec.accepts(offset) != expectedType then
-          throw new RoachException(
-            s"$offset: Field $fieldName is of type '$expectedType', " +
-              s"but the decoder only accepts '${codec.accepts(offset)}'"
-          )
-      }
-
-      (0 until nTuples).foreach { row =>
-        val func =
-          (i: Int) => PQgetvalue(r, row, i) // -> PQgetlength(r, row, i)
-        tuples.addOne(codec.decode(func))
-      }
-
-      tuples.result
-    end readAll
-  end extension
-
-  given Releasable[Result] with
-    def release(db: Result) =
-      if db != null then PQclear(db)
-end Result
-
 opaque type Database = Ptr[PGconn]
 
 object Database:
@@ -96,40 +21,36 @@ object Database:
     val conn = PQconnectdb(toCString(connString))
 
     if PQstatus(conn) != ConnStatusType.CONNECTION_OK then
-      val res = Left(fromCString(PQerrorMessage(conn)))
+      val res = Validated.error(fromCString(PQerrorMessage(conn)))
       PQfinish(conn)
       res
-    else Right(conn)
+    else Validated(conn)
 
   import Validated.*
   import Result.given
 
-  class Prepared[T] private[roach] (
-      db: Database,
-      codec: Codec[T],
-      statementName: String
-  ):
-    private val nParams = codec.length
-    def execute(data: T)(using z: Zone): Validated[Result] =
-      db.checkConnection()
-      val paramValues = stackalloc[CString](nParams)
-      val encoder = codec.encode(data)
-      for i <- 0 until nParams do paramValues(i) = encoder(i)
+  extension (d: Database)
+    def currentError =
+      val str = fromCString(PQerrorMessage(d))
+      Validated.error(str)
+
+    def executePrepared(
+        statementName: String,
+        nParams: Int,
+        values: ParamValues
+    )(using Zone): Validated[Result] =
       val res = PQexecPrepared(
-        db,
+        d,
         toCString(statementName),
         nParams,
-        paramValues,
+        values.asInstanceOf[Ptr[CString]],
         null,
         null,
         0
       )
+      d.result(Result(res))
+    end executePrepared
 
-      db.result(res)
-    end execute
-  end Prepared
-
-  extension (d: Database)
     def connectionIsOkay: Boolean =
       val status = PQstatus(d)
       status != ConnStatusType.CONNECTION_NEEDED && status != ConnStatusType.CONNECTION_BAD
@@ -151,21 +72,20 @@ object Database:
           status == PGRES_FATAL_ERROR
 
       if failed then
-        val ret =
-          Left(fromCString(PQerrorMessage(d)))
+        val ret = currentError
         PQclear(res)
         ret
-      else Right(res)
+      else Validated(Result(res))
     end execute
 
     def command(query: String)(using Zone): Unit =
       checkConnection()
       Using.resource(d.execute(query).getOrThrow) { res =>
-        PQresultStatus(res)
+        res.status
       }
 
     private[roach] def result(res: Result): Validated[Result] =
-      val status = PQresultStatus(res)
+      val status = res.status
       import ExecStatusType.*
 
       val failed =
@@ -174,9 +94,9 @@ object Database:
           status == PGRES_FATAL_ERROR
 
       if failed then
-        PQclear(res) // important!
-        Left(fromCString(PQerrorMessage(d)))
-      else Right(res)
+        res.clear()
+        currentError
+      else Validated(res)
     end result
 
     def prepare[T](
@@ -197,7 +117,7 @@ object Database:
         paramTypes
       )
 
-      result(res).map(_ => Prepared[T](d, codec, statementName))
+      result(Result(res)).map(_ => Prepared[T](d, codec, statementName))
     end prepare
 
     def executeParams[T](
@@ -225,7 +145,7 @@ object Database:
         0
       )
 
-      result(res)
+      result(Result(res))
 
     end executeParams
 
@@ -252,7 +172,7 @@ object Database:
         null,
         0
       )
-      result(res)
+      result(Result(res))
     end execute
 
   end extension
