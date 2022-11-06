@@ -33,32 +33,6 @@ object Database:
   import Result.given
 
   extension (d: Database)
-    private[roach] def currentError: String =
-      fromCString(PQerrorMessage(d))
-
-    def executePrepared(
-        statementName: String,
-        nParams: Int,
-        values: ParamValues
-    )(using Zone): Validated[Result] =
-      executePrepared(toCString(statementName), nParams, values)
-
-    def executePrepared(
-        statementName: CString,
-        nParams: Int,
-        values: ParamValues
-    ): Validated[Result] =
-      val res = PQexecPrepared(
-        d,
-        statementName,
-        nParams,
-        values.asInstanceOf[Ptr[CString]],
-        null,
-        null,
-        0
-      )
-      d.result(Result(res))
-    end executePrepared
 
     def connectionIsOkay: Boolean =
       val status = PQstatus(d)
@@ -67,7 +41,10 @@ object Database:
     def checkConnection(): Unit =
       val status = PQstatus(d)
       if status == ConnStatusType.CONNECTION_NEEDED || status == ConnStatusType.CONNECTION_BAD
-      then throw new RoachFatalException("Postgres connection is down")
+      then
+        throw new RoachFatalException(
+          s"Postgres connection is down: ${currentError}"
+        )
 
     def execute(query: String)(using Zone): Validated[Result] =
       checkConnection()
@@ -92,21 +69,6 @@ object Database:
       Using.resource(d.execute(query).getOrThrow) { res =>
         res.status
       }
-
-    private[roach] def result(res: Result): Validated[Result] =
-      val status = res.status
-      import ExecStatusType.*
-
-      val failed =
-        status == PGRES_BAD_RESPONSE ||
-          status == PGRES_NONFATAL_ERROR ||
-          status == PGRES_FATAL_ERROR
-
-      if failed then
-        res.clear()
-        Validated.error(currentError)
-      else Validated(res)
-    end result
 
     def prepare[T](
         query: String,
@@ -186,6 +148,48 @@ object Database:
 
     inline def unsafely[A](f: Ptr[PGconn] => A): A =
       f(d)
+
+    private[roach] def currentError: String =
+      fromCString(PQerrorMessage(d))
+
+    private[roach] def executePrepared(
+        statementName: String,
+        nParams: Int,
+        values: ParamValues
+    )(using Zone): Validated[Result] =
+      executePrepared(toCString(statementName), nParams, values)
+
+    private[roach] def executePrepared(
+        statementName: CString,
+        nParams: Int,
+        values: ParamValues
+    ): Validated[Result] =
+      val res = PQexecPrepared(
+        d,
+        statementName,
+        nParams,
+        values.asInstanceOf[Ptr[CString]],
+        null,
+        null,
+        0
+      )
+      d.result(Result(res))
+    end executePrepared
+
+    private[roach] def result(res: Result): Validated[Result] =
+      val status = res.status
+      import ExecStatusType.*
+
+      val failed =
+        status == PGRES_BAD_RESPONSE ||
+          status == PGRES_NONFATAL_ERROR ||
+          status == PGRES_FATAL_ERROR
+
+      if failed then
+        res.clear()
+        Validated.error(currentError)
+      else Validated(res)
+    end result
 
     /** Why is this method private? running PQfinish both shuts down the
       * connection and _frees the memory_. This means that the pointer we are
