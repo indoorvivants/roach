@@ -9,6 +9,9 @@ val Versions = new {
 
 import bindgen.interface.*
 
+lazy val root =
+  project.in(file(".")).aggregate(core, circe).settings(publish / skip := true)
+
 lazy val core =
   project
     .in(file("module-core"))
