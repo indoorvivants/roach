@@ -104,7 +104,7 @@ object Codec:
       CombineCodec(d, other)
   end extension
 
-  def stringLike[A](accept: String)(f: String => A): Codec[A] =
+  def stringLike[A](accept: String)(f: String => A, g: A => String = (_: A).toString): Codec[A] =
     new Codec[A]:
       inline def length: Int = 1
       inline def accepts(offset: Int) = accept
@@ -113,7 +113,7 @@ object Codec:
         f(fromCString(get(0)))
 
       def encode(value: A) =
-        _ => toCString(value.toString)
+        _ => toCString(g(value))
 
       override def toString() = s"Decode[$accept]"
 
