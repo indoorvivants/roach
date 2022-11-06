@@ -3,133 +3,37 @@ package roach
 import libpq.functions.*
 import libpq.types.*
 
-import scala.scalanative.unsigned.*
-import scala.scalanative.unsafe.*
+import java.util.UUID
 import scala.scalanative.libc.*
+import scala.scalanative.unsafe.*
+import scala.scalanative.unsigned.*
+import scala.util.Try
 import scala.util.Using
 import scala.util.Using.Releasable
-import java.util.UUID
-import scala.util.Try
 
 class RoachException(msg: String) extends Exception(msg)
 class RoachFatalException(msg: String) extends Exception(msg)
-
-opaque type Validated[A] = Either[String, A]
-object Validated:
-  extension [A](v: Validated[A])
-    inline def getOrThrow: A =
-      v match
-        case Left(err) => throw new RoachFatalException(err)
-        case Right(r)  => r
-    inline def either: Either[String, A] = v
-
-opaque type Result = Ptr[PGresult]
-object Result:
-  extension (r: Result)
-    inline def status: ExecStatusType = PQresultStatus(r)
-    def rows: (Vector[(Oid, String)], Vector[Vector[String]]) =
-      val nFields = PQnfields(r)
-      val nTuples = PQntuples(r)
-      val meta = Vector.newBuilder[(Oid, String)]
-      val tuples = Vector.newBuilder[Vector[String]]
-
-      // Read all the column names and their types
-      for i <- 0 until nFields do
-        meta.addOne(PQftype(r, i) -> fromCString(PQfname(r, i)))
-
-      // Read all the rows
-      for t <- 0 until nTuples
-      do
-        tuples.addOne(
-          (0 until nFields).map(f => fromCString(PQgetvalue(r, t, f))).toVector
-        )
-
-      meta.result -> tuples.result
-    end rows
-
-    def readOne[A](
-        codec: Codec[A]
-    )(using z: Zone): Option[A] = readAll(codec).headOption
-
-    def readAll[A](
-        codec: Codec[A]
-    )(using z: Zone, oids: OidMapping = OidMapping): Vector[A] =
-      val nFields = PQnfields(r)
-      val nTuples = PQntuples(r)
-      val tuples = Vector.newBuilder[A]
-
-      if (codec.length != PQnfields(r)) then
-        throw new RoachException(
-          s"Provided codec is for ${codec.length} fields, while the result has ${PQnfields(r)} fields"
-        )
-
-      (0 until nFields).foreach { offset =>
-        val expectedType = oids.rev(PQftype(r, offset))
-        val fieldName = fromCString(PQfname(r, offset))
-
-        if codec.accepts(offset) != expectedType then
-          throw new RoachException(
-            s"$offset: Field $fieldName is of type '$expectedType', " +
-              s"but the decoder only accepts '${codec.accepts(offset)}'"
-          )
-      }
-
-      (0 until nTuples).foreach { row =>
-        val func =
-          (i: Int) => PQgetvalue(r, row, i) // -> PQgetlength(r, row, i)
-        tuples.addOne(codec.decode(func))
-      }
-
-      tuples.result
-    end readAll
-  end extension
-
-  given Releasable[Result] with
-    def release(db: Result) =
-      if db != null then PQclear(db)
-end Result
 
 opaque type Database = Ptr[PGconn]
 
 object Database:
   def apply(connString: String)(using Zone): Validated[Database] =
-    val conn = PQconnectdb(toCString(connString))
+    apply(toCString(connString))
+
+  def apply(connString: CString): Validated[Database] =
+    val conn = PQconnectdb(connString)
 
     if PQstatus(conn) != ConnStatusType.CONNECTION_OK then
-      val res = Left(fromCString(PQerrorMessage(conn)))
+      val res = Validated.error(conn.currentError)
       PQfinish(conn)
       res
-    else Right(conn)
+    else Validated(conn)
 
   import Validated.*
   import Result.given
 
-  class Prepared[T] private[roach] (
-      db: Database,
-      codec: Codec[T],
-      statementName: String
-  ):
-    private val nParams = codec.length
-    def execute(data: T)(using z: Zone): Validated[Result] =
-      db.checkConnection()
-      val paramValues = stackalloc[CString](nParams)
-      val encoder = codec.encode(data)
-      for i <- 0 until nParams do paramValues(i) = encoder(i)
-      val res = PQexecPrepared(
-        db,
-        toCString(statementName),
-        nParams,
-        paramValues,
-        null,
-        null,
-        0
-      )
-
-      db.result(res)
-    end execute
-  end Prepared
-
   extension (d: Database)
+
     def connectionIsOkay: Boolean =
       val status = PQstatus(d)
       status != ConnStatusType.CONNECTION_NEEDED && status != ConnStatusType.CONNECTION_BAD
@@ -137,7 +41,10 @@ object Database:
     def checkConnection(): Unit =
       val status = PQstatus(d)
       if status == ConnStatusType.CONNECTION_NEEDED || status == ConnStatusType.CONNECTION_BAD
-      then throw new RoachFatalException("Postgres connection is down")
+      then
+        throw new RoachFatalException(
+          s"Postgres connection is down: ${currentError}"
+        )
 
     def execute(query: String)(using Zone): Validated[Result] =
       checkConnection()
@@ -151,33 +58,17 @@ object Database:
           status == PGRES_FATAL_ERROR
 
       if failed then
-        val ret =
-          Left(fromCString(PQerrorMessage(d)))
+        val ret = Validated.error(currentError)
         PQclear(res)
         ret
-      else Right(res)
+      else Validated(Result(res))
     end execute
 
     def command(query: String)(using Zone): Unit =
       checkConnection()
       Using.resource(d.execute(query).getOrThrow) { res =>
-        PQresultStatus(res)
+        res.status
       }
-
-    private[roach] def result(res: Result): Validated[Result] =
-      val status = PQresultStatus(res)
-      import ExecStatusType.*
-
-      val failed =
-        status == PGRES_BAD_RESPONSE ||
-          status == PGRES_NONFATAL_ERROR ||
-          status == PGRES_FATAL_ERROR
-
-      if failed then
-        PQclear(res) // important!
-        Left(fromCString(PQerrorMessage(d)))
-      else Right(res)
-    end result
 
     def prepare[T](
         query: String,
@@ -197,7 +88,7 @@ object Database:
         paramTypes
       )
 
-      result(res).map(_ => Prepared[T](d, codec, statementName))
+      result(Result(res)).map(_ => Prepared[T](d, codec, statementName))
     end prepare
 
     def executeParams[T](
@@ -225,7 +116,7 @@ object Database:
         0
       )
 
-      result(res)
+      result(Result(res))
 
     end executeParams
 
@@ -252,13 +143,72 @@ object Database:
         null,
         0
       )
-      result(res)
+      result(Result(res))
     end execute
+
+    inline def unsafely[A](f: Ptr[PGconn] => A): A =
+      f(d)
+
+    private[roach] def currentError: String =
+      fromCString(PQerrorMessage(d))
+
+    private[roach] def executePrepared(
+        statementName: String,
+        nParams: Int,
+        values: ParamValues
+    )(using Zone): Validated[Result] =
+      executePrepared(toCString(statementName), nParams, values)
+
+    private[roach] def executePrepared(
+        statementName: CString,
+        nParams: Int,
+        values: ParamValues
+    ): Validated[Result] =
+      val res = PQexecPrepared(
+        d,
+        statementName,
+        nParams,
+        values.asInstanceOf[Ptr[CString]],
+        null,
+        null,
+        0
+      )
+      d.result(Result(res))
+    end executePrepared
+
+    private[roach] def result(res: Result): Validated[Result] =
+      val status = res.status
+      import ExecStatusType.*
+
+      val failed =
+        status == PGRES_BAD_RESPONSE ||
+          status == PGRES_NONFATAL_ERROR ||
+          status == PGRES_FATAL_ERROR
+
+      if failed then
+        res.clear()
+        Validated.error(currentError)
+      else Validated(res)
+    end result
+
+    /** Why is this method private? running PQfinish both shuts down the
+      * connection and _frees the memory_. This means that the pointer we are
+      * wrapping is no longer valid - any attempts to run things like PQstatus
+      * on it lead to a segfault.
+      *
+      * Therefore I made the decision to not expose a way to terminate the
+      * connection this way - otherwise it will lead to all sorts of memory
+      * shenanigans.
+      *
+      * Users can still use the unsafely block to perform raw operations on the
+      * pointer.
+      */
+    private[roach] def closeConnection() =
+      if d != null && PQstatus(d) == ConnStatusType.CONNECTION_OK then
+        PQfinish(d)
 
   end extension
 
   given Releasable[Database] with
-    def release(db: Database) =
-      if db != null && PQstatus(db) == ConnStatusType.CONNECTION_OK then
-        PQfinish(db)
+    def release(db: Database) = db.closeConnection()
 end Database

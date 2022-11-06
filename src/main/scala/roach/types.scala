@@ -2,6 +2,7 @@ package roach
 
 import libpq.types.Oid
 import scala.scalanative.unsigned.*
+import scala.collection.immutable.IntMap
 
 trait OidMapping:
   def map(c: String): Oid
@@ -9,7 +10,7 @@ trait OidMapping:
 
 object OidMapping extends OidMapping:
   private val mapping =
-    Map(
+    IntMap(
       21 -> "int2",
       23 -> "int4",
       20 -> "int8",

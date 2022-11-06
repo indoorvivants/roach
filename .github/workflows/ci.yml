@@ -53,8 +53,11 @@ jobs:
           set -e
           docker run -p 5432:5432 -e POSTGRES_PASSWORD=mysecretpassword -d postgres
 
-      - name: CI 
-        run: $SBTN 'test; publishLocal'
+      - name: Tests 
+        run: $SBTN test 
+
+      - name: Docs 
+        run: $SBTN 'docs/mdoc --in README.md'
 
       - name: Publish ${{ github.ref }}
         if: startsWith(github.ref, 'refs/tags/v') || (github.ref == 'refs/heads/main')
