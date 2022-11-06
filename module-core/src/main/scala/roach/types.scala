@@ -23,7 +23,9 @@ object OidMapping extends OidMapping:
       18 -> "char",
       2950 -> "uuid",
       19 -> "name",
-      16 -> "bool"
+      16 -> "bool",
+      114 -> "json",
+      3802 -> "jsonb"
     ).map((k, v) => Oid(k.toUInt) -> v)
 
   private val reverse = mapping.map(_.swap)

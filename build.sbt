@@ -9,19 +9,21 @@ val Versions = new {
 
 import bindgen.interface.*
 
-lazy val roach =
+lazy val root =
+  project.in(file(".")).aggregate(core, circe).settings(publish / skip := true)
+
+lazy val core =
   project
-    .in(file("."))
+    .in(file("module-core"))
     .enablePlugins(
       ScalaNativePlugin,
       ScalaNativeJUnitPlugin,
       BindgenPlugin,
       VcpkgPlugin
     )
+    .settings(common)
     .settings(
-      scalaVersion := Versions.Scala,
-      vcpkgDependencies := Set("libpq"),
-      bindgenBindings += {
+      Compile / bindgenBindings += {
         val configurator = vcpkgConfigurator.value
 
         Binding(
@@ -33,16 +35,8 @@ lazy val roach =
             .updateCompilationFlags(List("-std=gnu99"), "libpq")
             .toList
         )
-      }
-    )
-    .settings(vcpkgNativeConfig())
-    .settings(vcpkgNativeConfig(conf = Test))
-    .settings(
-      organization := "com.indoorvivants.roach",
+      },
       moduleName := "core",
-      scalaVersion := Versions.Scala,
-      resolvers ++= Resolver.sonatypeOssRepos("snapshots"),
-      libraryDependencies += "org.scalameta" %%% "munit" % "1.0.0-M6" % Test,
       Compile / packageSrc / mappings ++= {
         val base = (Compile / sourceManaged).value
         val files = (Compile / managedSources).value
@@ -50,12 +44,29 @@ lazy val roach =
       }
     )
 
+lazy val circe =
+  project
+    .in(file("module-circe"))
+    .dependsOn(core % "compile->compile;test->test")
+    .enablePlugins(ScalaNativePlugin, VcpkgPlugin, BindgenPlugin)
+    .settings(libraryDependencies += "io.circe" %%% "circe-parser" % "0.14.3")
+    .settings(moduleName := "circe")
+    .settings(common)
+
+val common = Seq(
+  organization := "com.indoorvivants.roach",
+  scalaVersion := Versions.Scala,
+  libraryDependencies += "org.scalameta" %%% "munit" % "1.0.0-M6" % Test,
+  resolvers ++= Resolver.sonatypeOssRepos("snapshots"),
+  vcpkgDependencies := Set("libpq")
+) ++ vcpkgNativeConfig() ++ vcpkgNativeConfig(conf = Test)
+
 lazy val docs =
   project
     .in(file("target/.docs-target"))
     .enablePlugins(MdocPlugin)
     .settings(scalaVersion := Versions.Scala)
-    .dependsOn(roach)
+    .dependsOn(core, circe)
     .settings(
       publish / skip := true
     )
