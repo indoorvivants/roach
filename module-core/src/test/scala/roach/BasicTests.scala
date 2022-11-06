@@ -8,8 +8,20 @@ import scala.scalanative.unsigned.*
 import libpq.types.Oid
 import scala.util.Try.apply
 import scala.util.Try
+import java.util.UUID
 
-class Tests extends munit.FunSuite with TestHarness:
+class BasicTests extends munit.FunSuite with TestHarness:
+  override protected def tableCreationSQL: Option[String => String] =
+    Some(tableName => s"""
+    CREATE TABLE $tableName(
+      f_int2 int2 not null,
+      f_int4 int4 not null,
+      f_int8 int8 not null,
+      f_varchar varchar not null,
+      f_text text not null,
+      f_uid uuid not null
+    )
+    """)
 
   test("super basics") {
     zone {
@@ -23,6 +35,46 @@ class Tests extends munit.FunSuite with TestHarness:
           assert(retrieved(Oid(23.toUInt)) == "int4")
           assert(retrieved(Oid(1043.toUInt)) == "varchar")
         }
+      }
+    }
+  }
+
+  test("codecs") {
+    case class Row(
+        short: Short,
+        int: Int,
+        long: Long,
+        vc: String,
+        txt: String,
+        uid: UUID
+    )
+    val codec = int2 ~ int4 ~ int8 ~ varchar ~ text ~ uuid
+    val rowCodec = codec.as[Row]
+
+    zone {
+      withDB { db ?=>
+        val row = Row(
+          Short.MaxValue,
+          Int.MaxValue,
+          Long.MaxValue,
+          "varchar",
+          "text",
+          UUID.fromString("5D7BC610-17DF-460F-BCA9-AADB391A252D")
+        )
+
+        // TODO: figure out a better way of doing this
+        db.executeParams(
+          s"insert into $tableName values(${List.tabulate(rowCodec.length)(n => "$" + (n + 1)).mkString(", ")})",
+          rowCodec,
+          row
+        ).getOrThrow
+
+        val result = db
+          .execute(s"select * from $tableName")
+          .getOrThrow
+          .use(_.readOne(rowCodec))
+
+        assertEquals(result, Some(row))
       }
     }
   }
@@ -162,4 +214,4 @@ class Tests extends munit.FunSuite with TestHarness:
       }
     }
   }
-end Tests
+end BasicTests

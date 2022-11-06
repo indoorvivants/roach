@@ -6,6 +6,7 @@ import scala.scalanative.unsafe.Zone
 import roach.*
 
 trait TestHarness:
+  self: munit.FunSuite =>
   val connectionString =
     "postgresql://postgres:mysecretpassword@localhost:5432/postgres?application_name=roach_tests"
 
@@ -16,4 +17,30 @@ trait TestHarness:
 
   def query[A](q: String)(f: Result => A)(using Zone)(using db: Database): A =
     Using.resource(db.execute(q).getOrThrow)(f)
+
+  protected def tablePrefix: String = "roach_tests"
+  protected def tableCreationSQL: Option[String => String] = None
+
+  protected var tableName: String | Null = null
+
+  // Runs once before all tests start.
+  override def beforeAll(): Unit =
+    tableCreationSQL.foreach { sql =>
+      zone {
+        withDB { db ?=>
+          val prepTableName = s"${tablePrefix}_${util.Random().nextLong.abs}"
+          db.execute(sql(prepTableName)).getOrThrow
+
+          tableName = prepTableName
+        }
+      }
+    }
+
+  override def afterAll(): Unit =
+    zone {
+      withDB { db ?=>
+        if tableName != null then
+          db.execute(s"drop table $tableName").getOrThrow
+      }
+    }
 end TestHarness

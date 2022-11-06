@@ -7,33 +7,15 @@ import io.circe.JsonNumber
 import roach.Pool
 
 class CirceTests extends munit.FunSuite with roach.tests.TestHarness:
-  var tableName: String | Null = null
 
-  // Runs once before all tests start.
-  override def beforeAll(): Unit =
-    zone {
-      withDB { db ?=>
-        val prepTableName = s"roach_test_circe_${util.Random().nextLong.abs}"
-        db.execute(
-          s"""
-          CREATE TABLE $prepTableName (
+  override def tablePrefix: String = "roach_test_circe"
+  override def tableCreationSQL =
+    Some(tableName => s"""
+          CREATE TABLE $tableName (
             id serial NOT NULL PRIMARY KEY,
             info json NOT NULL
           );
-          """
-        ).getOrThrow
-
-        tableName = prepTableName
-      }
-    }
-
-  override def afterAll(): Unit =
-    zone {
-      withDB { db ?=>
-        if tableName != null then
-          db.execute(s"drop table $tableName").getOrThrow
-      }
-    }
+          """)
 
   test("read: raw json") {
     zone {
@@ -96,7 +78,6 @@ class CirceTests extends munit.FunSuite with roach.tests.TestHarness:
       }
     }
   }
-
 
   test("read: json codec") {
     case class Top(bar: String, balance: Double, active: Boolean)
