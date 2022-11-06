@@ -41,13 +41,23 @@ lazy val roach =
       organization := "com.indoorvivants.roach",
       moduleName := "core",
       scalaVersion := Versions.Scala,
-      resolvers += Resolver.sonatypeRepo("snapshots"),
+      resolvers ++= Resolver.sonatypeOssRepos("snapshots"),
       libraryDependencies += "org.scalameta" %%% "munit" % "1.0.0-M6" % Test,
       Compile / packageSrc / mappings ++= {
         val base = (Compile / sourceManaged).value
         val files = (Compile / managedSources).value
         files.map { f => (f, f.relativeTo(base).get.getPath) }
       }
+    )
+
+lazy val docs =
+  project
+    .in(file("target/.docs-target"))
+    .enablePlugins(MdocPlugin)
+    .settings(scalaVersion := Versions.Scala)
+    .dependsOn(roach)
+    .settings(
+      publish / skip := true
     )
 
 def vcpkgNativeConfig(

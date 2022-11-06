@@ -74,9 +74,12 @@ object Result:
 
       tuples.result
     end readAll
+
+    inline def use[A](f: Result => A) = 
+      Using.resource(r)(f)
   end extension
 
   given Releasable[Result] with
-    def release(db: Result) =
-      if db != null then db.clear()
+    def release(res: Result) =
+      if res != null then res.clear()
 end Result

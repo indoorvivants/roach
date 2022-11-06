@@ -95,6 +95,23 @@ class Tests extends munit.FunSuite:
     }
   }
 
+  test("execute params") {
+    zone {
+      withDB { db ?=>
+        db.executeParams(
+          "select oid::int4 from pg_type where typname = $1",
+          varchar,
+          "bool"
+        ).getOrThrow
+          .use { res =>
+            val row: Option[Int] = res.readOne(int4)
+
+            assert(row.contains(16))
+          }
+      }
+    }
+  }
+
   test("prepared") {
     zone {
       withDB { db ?=>

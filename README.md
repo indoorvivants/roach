@@ -11,6 +11,7 @@ Pre-requisites:
 
 1. For compilation and linking, `libpq-dev` (debian) or similar package has to be installed
 2. For runtime, `libpq5` (debian) or similar has to be installed 
+   - Unless you are linking your binary statically, of course
 3. For Scala Native, LLVM has to be installed.
 
 ## Example using [scala-cli](https://scala-cli.virtuslab.org/)
@@ -21,27 +22,36 @@ Assuming you have postgres running:
 $ docker run -p 5432:5432 -e POSTGRES_PASSWORD=mysecretpassword -d postgres
 ```
 
-```scala 
+```scala mdoc:compile-only
 //> using repository "sonatype:snapshots"
 //> using platform "scala-native"
-//> using lib "com.indoorvivants.roach::core::0.0.0+11-5fe82ae3-SNAPSHOT"
+//> using lib "com.indoorvivants.roach::core::0.0.1"
 
 import roach.*
 import scala.util.Using
 import scala.scalanative.unsafe.Zone
 
-@main def hello =
-  val connectionString =
-    "postgresql://postgres:mysecretpassword@localhost:5432/postgres"
-  Zone { implicit z =>
-    Using.resource(Database(connectionString).getOrThrow) { db =>
-      Using.resource(db.execute("select typname from pg_type").getOrThrow) {
+import roach.codecs.*
+
+val connectionString =
+  "postgresql://postgres:mysecretpassword@localhost:5432/postgres"
+
+Zone { implicit z =>
+  Pool.single(connectionString) { pool => 
+    pool.lease { db => 
+      db.execute("select typname, typisdefined from pg_type").getOrThrow.use {
         res =>
-          val rows = res.readAll(codecs.name)
+          val rows: Vector[(String, Boolean)] = res.readAll(name ~ bool)
 
           rows.foreach(println)
       }
+
+      db.executeParams("select oid::int4 from pg_type where typname = $1", varchar, "bool").getOrThrow.use { res =>
+        val row: Option[Int] = res.readOne(int4)
+
+        assert(row.contains(16))
+      }
     }
   }
-end hello
+}
 ```

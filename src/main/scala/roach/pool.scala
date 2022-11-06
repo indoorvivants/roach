@@ -9,6 +9,8 @@ private[roach] enum Slot:
 trait Pool:
   def lease[A](f: Database => A): A
 
+  def withLease[A](f: Database ?=> A): A = lease(db => f(using db))
+
 object Pool:
   def single[A](connString: String)(f: Pool => A)(using Zone) =
     val pool = Single(toCString(connString))

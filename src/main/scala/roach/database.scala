@@ -3,13 +3,13 @@ package roach
 import libpq.functions.*
 import libpq.types.*
 
-import scala.scalanative.unsigned.*
-import scala.scalanative.unsafe.*
+import java.util.UUID
 import scala.scalanative.libc.*
+import scala.scalanative.unsafe.*
+import scala.scalanative.unsigned.*
+import scala.util.Try
 import scala.util.Using
 import scala.util.Using.Releasable
-import java.util.UUID
-import scala.util.Try
 
 class RoachException(msg: String) extends Exception(msg)
 class RoachFatalException(msg: String) extends Exception(msg)
@@ -24,7 +24,7 @@ object Database:
     val conn = PQconnectdb(connString)
 
     if PQstatus(conn) != ConnStatusType.CONNECTION_OK then
-      val res = conn.currentError
+      val res = Validated.error(conn.currentError)
       PQfinish(conn)
       res
     else Validated(conn)
@@ -33,9 +33,8 @@ object Database:
   import Result.given
 
   extension (d: Database)
-    private[roach] def currentError: Validated[Nothing] =
-      val str = fromCString(PQerrorMessage(d))
-      Validated.error(str)
+    private[roach] def currentError: String =
+      fromCString(PQerrorMessage(d))
 
     def executePrepared(
         statementName: String,
@@ -82,7 +81,7 @@ object Database:
           status == PGRES_FATAL_ERROR
 
       if failed then
-        val ret = currentError
+        val ret = Validated.error(currentError)
         PQclear(res)
         ret
       else Validated(Result(res))
@@ -105,7 +104,7 @@ object Database:
 
       if failed then
         res.clear()
-        currentError
+        Validated.error(currentError)
       else Validated(res)
     end result
 
@@ -185,6 +184,21 @@ object Database:
       result(Result(res))
     end execute
 
+    inline def unsafely[A](f: Ptr[PGconn] => A): A =
+      f(d)
+
+    /** Why is this method private? running PQfinish both shuts down the
+      * connection and _frees the memory_. This means that the pointer we are
+      * wrapping is no longer valid - any attempts to run things like PQstatus
+      * on it lead to a segfault.
+      *
+      * Therefore I made the decision to not expose a way to terminate the
+      * connection this way - otherwise it will lead to all sorts of memory
+      * shenanigans.
+      *
+      * Users can still use the unsafely block to perform raw operations on the
+      * pointer.
+      */
     private[roach] def closeConnection() =
       if d != null && PQstatus(d) == ConnStatusType.CONNECTION_OK then
         PQfinish(d)
