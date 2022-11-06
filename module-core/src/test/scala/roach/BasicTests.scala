@@ -19,7 +19,10 @@ class BasicTests extends munit.FunSuite with TestHarness:
       f_int8 int8 not null,
       f_varchar varchar not null,
       f_text text not null,
-      f_uid uuid not null
+      f_uid uuid not null,
+      f_float float4 not null,
+      f_double float8 not null,
+      f_bool bool not null
     )
     """)
 
@@ -46,9 +49,14 @@ class BasicTests extends munit.FunSuite with TestHarness:
         long: Long,
         vc: String,
         txt: String,
-        uid: UUID
+        uid: UUID,
+        float: Float,
+        double: Double,
+        bool: Boolean
     )
-    val codec = int2 ~ int4 ~ int8 ~ varchar ~ text ~ uuid
+    val codec =
+      int2 ~ int4 ~ int8 ~ varchar ~ text ~ uuid ~ float4 ~ float8 ~ bool
+
     val rowCodec = codec.as[Row]
 
     zone {
@@ -59,7 +67,10 @@ class BasicTests extends munit.FunSuite with TestHarness:
           Long.MaxValue,
           "varchar",
           "text",
-          UUID.fromString("5D7BC610-17DF-460F-BCA9-AADB391A252D")
+          UUID.fromString("5D7BC610-17DF-460F-BCA9-AADB391A252D"),
+          Float.MaxValue,
+          Double.MaxValue,
+          false
         )
 
         // TODO: figure out a better way of doing this

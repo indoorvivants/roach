@@ -18,7 +18,6 @@ object codecs:
   val float8 = stringLike[Double]("float8")(_.toDouble)
   val uuid = stringLike[UUID]("uuid")(UUID.fromString(_))
   val bool = stringLike[Boolean]("bool")(_ == "t")
-  val char = stringLike[Char]("char")(_(0).toChar)
   val name = textual("name")
   val varchar = textual("varchar")
   val bpchar = textual("bpchar")
