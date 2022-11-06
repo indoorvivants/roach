@@ -18,10 +18,13 @@ opaque type Database = Ptr[PGconn]
 
 object Database:
   def apply(connString: String)(using Zone): Validated[Database] =
-    val conn = PQconnectdb(toCString(connString))
+    apply(toCString(connString))
+
+  def apply(connString: CString): Validated[Database] =
+    val conn = PQconnectdb(connString)
 
     if PQstatus(conn) != ConnStatusType.CONNECTION_OK then
-      val res = Validated.error(fromCString(PQerrorMessage(conn)))
+      val res = conn.currentError
       PQfinish(conn)
       res
     else Validated(conn)
@@ -30,7 +33,7 @@ object Database:
   import Result.given
 
   extension (d: Database)
-    def currentError =
+    private[roach] def currentError: Validated[Nothing] =
       val str = fromCString(PQerrorMessage(d))
       Validated.error(str)
 
@@ -39,9 +42,16 @@ object Database:
         nParams: Int,
         values: ParamValues
     )(using Zone): Validated[Result] =
+      executePrepared(toCString(statementName), nParams, values)
+
+    def executePrepared(
+        statementName: CString,
+        nParams: Int,
+        values: ParamValues
+    ): Validated[Result] =
       val res = PQexecPrepared(
         d,
-        toCString(statementName),
+        statementName,
         nParams,
         values.asInstanceOf[Ptr[CString]],
         null,
@@ -175,10 +185,12 @@ object Database:
       result(Result(res))
     end execute
 
+    private[roach] def closeConnection() =
+      if d != null && PQstatus(d) == ConnStatusType.CONNECTION_OK then
+        PQfinish(d)
+
   end extension
 
   given Releasable[Database] with
-    def release(db: Database) =
-      if db != null && PQstatus(db) == ConnStatusType.CONNECTION_OK then
-        PQfinish(db)
+    def release(db: Database) = db.closeConnection()
 end Database
