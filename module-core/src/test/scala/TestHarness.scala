@@ -4,11 +4,14 @@ import scala.util.Using
 import scala.scalanative.unsafe.Zone
 
 import roach.*
+import scala.util.Try
 
 trait TestHarness:
   self: munit.FunSuite =>
+  protected def appName =
+    s"roach_tests${getClass().getSimpleName().replaceAllLiterally("$", "_")}"
   val connectionString =
-    "postgresql://postgres:mysecretpassword@localhost:5432/postgres?application_name=roach_tests"
+    s"postgresql://postgres:mysecretpassword@localhost:5432/postgres?application_name=$appName"
 
   inline def zone[A](inline f: Zone ?=> A) = Zone.apply(z => f(using z))
 
@@ -22,6 +25,10 @@ trait TestHarness:
   protected def tableCreationSQL: Option[String => String] = None
 
   protected var tableName: String | Null = null
+
+  def cleanup(p: Pool)(tableName: String*)(f: () => Unit)(using z: Zone) =
+    try f()
+    finally tableName.foreach(t => Try(p.lease(_.command(s"drop table $t"))))
 
   // Runs once before all tests start.
   override def beforeAll(): Unit =

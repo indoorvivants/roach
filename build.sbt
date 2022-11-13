@@ -23,6 +23,7 @@ lazy val core =
     )
     .settings(common)
     .settings(
+      Test / nativeConfig ~= (_.withEmbedResources(true)),
       Compile / bindgenBindings += {
         val configurator = vcpkgConfigurator.value
 

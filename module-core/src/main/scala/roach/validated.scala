@@ -11,7 +11,7 @@ object Validated:
   extension [A](v: Validated[A])
     inline def getOrThrow: A =
       v match
-        case Left(err) => throw new RoachFatalException(err)
+        case Left(err) => throw new RoachFatalException(err, None)
         case Right(r)  => r
     inline def either: Either[String, A] = v
     inline def map[B](inline f: A => B): Validated[B] =

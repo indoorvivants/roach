@@ -12,7 +12,8 @@ import scala.util.Using
 import scala.util.Using.Releasable
 
 class RoachException(msg: String) extends Exception(msg)
-class RoachFatalException(msg: String) extends Exception(msg)
+class RoachFatalException(msg: String, cause: Option[Throwable] = None)
+    extends Exception(msg, cause.orNull)
 
 opaque type Database = Ptr[PGconn]
 
