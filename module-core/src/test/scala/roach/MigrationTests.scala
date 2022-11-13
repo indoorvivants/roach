@@ -9,10 +9,19 @@ class MigrationTests extends munit.FunSuite, TestHarness:
       Pool.single(connectionString) { pool =>
         cleanup(pool)("migration_test_1", "howdy") { () =>
 
-          Migrate.all(pool, tableName = "migration_test_1")(
+          val result = Migrate.all(pool, tableName = "migration_test_1")(
             ResourceFile("/test_1.1.sql"),
             ResourceFile("/test_1.2.sql"),
             ResourceFile("/test_1.3.sql")
+          )
+
+          assertEquals(
+            result.applied,
+            Vector("test_1.1.sql", "test_1.2.sql", "test_1.3.sql")
+          )
+          assertEquals(
+            result.present,
+            Vector.empty
           )
 
           assertEquals(
@@ -51,10 +60,19 @@ class MigrationTests extends munit.FunSuite, TestHarness:
             Option(1)
           )
 
-          Migrate.all(pool, tableName = tst)(
+          val result = Migrate.all(pool, tableName = tst)(
             ResourceFile("/test_1.1.sql"),
             ResourceFile("/test_1.2.sql"),
             ResourceFile("/test_1.3.sql")
+          )
+
+          assertEquals(
+            result.applied,
+            Vector.empty
+          )
+          assertEquals(
+            result.present,
+            Vector("test_1.1.sql", "test_1.2.sql", "test_1.3.sql")
           )
 
           assertEquals(

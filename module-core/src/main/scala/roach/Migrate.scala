@@ -5,12 +5,13 @@ import scalanative.unsafe.Zone
 object Migrate:
   def all(pool: Pool, tableName: String = defaultTableName)(
       files: ResourceFile*
-  ) = Zone { implicit z =>
+  ): MigrationResult = Zone { implicit z =>
     pool.withLease(createTable(tableName))
 
     var rollback = false
 
     val applied = Vector.newBuilder[String]
+    val present = Vector.newBuilder[String]
 
     pool.withLease { db ?=>
 
@@ -18,6 +19,8 @@ object Migrate:
       db.command(s"LOCK TABLE $tableName IN ACCESS EXCLUSIVE MODE")
       try
         val current = readAll(tableName)
+        present.addAll(current.map(_._2))
+
         val expected =
           files
             .map(_.filename)
@@ -50,7 +53,7 @@ object Migrate:
                 s"insert into $tableName (filename, applied) values ($$1, now()) returning id",
                 codecs.varchar
               ).exec(rf.filename)
-              applied.addOne(rf.value)
+              applied.addOne(rf.filename)
             catch
               case exc: RoachFatalException =>
                 rollback = true
@@ -68,7 +71,10 @@ object Migrate:
       end try
     }
 
+    MigrationResult(applied.result(), present.result())
   }
+
+  case class MigrationResult(applied: Vector[String], present: Vector[String])
 
   private def read(rf: ResourceFile) =
     val resourceName = getClass().getResourceAsStream(rf.value)
