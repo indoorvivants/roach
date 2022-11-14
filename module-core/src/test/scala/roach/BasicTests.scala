@@ -10,7 +10,7 @@ import scala.util.Try.apply
 import scala.util.Try
 import java.util.UUID
 
-class BasicTests extends munit.FunSuite with TestHarness:
+class BasicTests extends munit.FunSuite, TestHarness:
   override protected def tableCreationSQL: Option[String => String] =
     Some(tableName => s"""
     CREATE TABLE $tableName(
@@ -37,6 +37,28 @@ class BasicTests extends munit.FunSuite with TestHarness:
           assert(retrieved(Oid(16.toUInt)) == "bool")
           assert(retrieved(Oid(23.toUInt)) == "int4")
           assert(retrieved(Oid(1043.toUInt)) == "varchar")
+        }
+      }
+    }
+  }
+
+  test("arrays") {
+    zone {
+      withDB { db ?=>
+        query(
+          "SELECT ARRAY[ARRAY['hпрd^sâветe\"l,lo'], ARRAY['bla']]"
+        ) { result =>
+          result.readOne(
+            Codec.stringLike[String]("_text")(identity, identity)
+          )
+
+        }
+        query(
+          "SELECT ARRAY[ARRAY[1,2],ARRAY[4,5],ARRAY[1,351]]"
+        ) { result =>
+          result.readOne(
+            Codec.stringLike[String]("_int4")(identity, identity)
+          )
         }
       }
     }
@@ -92,7 +114,7 @@ class BasicTests extends munit.FunSuite with TestHarness:
 
   private def findPid()(using Database, Zone) =
     query(
-      "select pid::int4 from pg_stat_activity where application_name = 'roach_tests'"
+      s"select pid::int4 from pg_stat_activity where application_name = '$appName'"
     ) { res =>
       res.readOne(int4).get
     }
