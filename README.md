@@ -60,6 +60,7 @@ Zone { implicit z =>
 
 ### Gratuitous `Query` abstraction
 
+This is the raw API without any macro magic. For macro magic see the `sql"..."` interpolator section below.
 
 ```scala mdoc:compile-only
 import roach.*
@@ -78,6 +79,51 @@ def example(using Database, Zone) =
   // a query with no input parameters and no result
   Query("select count(*) from my_table").exec()
 ```
+
+### `sql"..."` interpolator
+
+Similar to [Skunk](https://tpolecat.github.io/skunk/tutorial/Query.html)'s, just a lot less advanced.
+
+```scala mdoc:compile-only
+import roach.*
+import roach.codecs.*
+import scalanative.unsafe.*
+
+def example(using Database, Zone) = 
+  sql"select count(*) from my_table where x = $int4".all(25, int4)
+  sql"select count(*) from my_table where x = $int4 and y = $text".count(25 -> "hello")
+  sql"select count(*) from my_table".count()
+  sql"select count(*) from my_table where x = $int4 and y = $text".count(25 -> "hello")
+
+  case class Data(key: Int, value: String)
+  val rc = (int4 ~ text).as[Data]
+  val tableName = "my_table"
+  sql"insert into $tableName values ($rc)".exec(Data(150, "howdies"))
+```
+
+Note that the parameters to the query are verified at compile time, not runtime, 
+i.e. these usages will not compile:
+
+```scala mdoc:fail
+import roach.*
+import roach.codecs.*
+import scalanative.unsafe.*
+
+def example_failure(using Database, Zone) = 
+  //  Found:    ("hello" : String)
+  //  Required: Int
+  //    sql"select count(*) from my_table where x = $int4".count("hello")
+  //                                                             ^^^^^^^
+  sql"select count(*) from my_table where x = $int4".count("hello")
+
+  // Found:    (String, Int)
+  // Required: (Int, String)
+  //   sql"select count(*) from my_table where x = $int4 and y = $text".count("hello" -> 25)
+  //                                                                          ^^^^^^^^^^^^^
+  sql"select count(*) from my_table where x = $int4 and y = $text".count("hello" -> 25)
+```
+
+`sql` interpolator produces a `Query`, so you can use it as described in the previous section
 
 ### Simple JSON module (with Circe)
 
