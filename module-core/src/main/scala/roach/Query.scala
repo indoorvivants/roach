@@ -31,6 +31,12 @@ object Query:
         db: Database
     ): Unit =
       q(data).use { _ => }
+
+    def count(data: T)(using
+        iz: Zone,
+        db: Database
+    ): Int =
+      q(data).use(_.count())
   end extension
 
   extension (q: Query[Unit])
@@ -42,5 +48,11 @@ object Query:
 
     def exec()(using iz: Zone, db: Database): Unit =
       q(()).use { _ => }
+
+    def count()(using
+        iz: Zone,
+        db: Database
+    ): Int =
+      q(()).use(_.count())
   end extension
 end Query
