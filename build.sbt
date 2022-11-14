@@ -69,7 +69,17 @@ lazy val docs =
     .settings(scalaVersion := Versions.Scala)
     .dependsOn(core, circe)
     .settings(
-      publish / skip := true
+      publish / skip := true,
+      Compile / resourceGenerators += Def.task {
+        val folder = (Compile / unmanagedResourceDirectories).value.head
+
+        for {
+          i <- (1 to 3).toSeq
+          name = s"v00$i.sql"
+          _ = IO.write(folder / name, "")
+        } yield folder / name
+
+      }
     )
 
 def vcpkgNativeConfig(
