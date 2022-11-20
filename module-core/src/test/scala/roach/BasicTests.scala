@@ -137,7 +137,7 @@ class BasicTests extends munit.FunSuite, TestHarness:
     }
   }
 
-  test("single slot pool".only) {
+  test("single slot pool") {
     zone {
       Pool.single(connectionString) { pool =>
         var old: Database | Null = null
