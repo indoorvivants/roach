@@ -40,11 +40,10 @@ object Database:
 
     def checkConnection(): Unit =
       val status = PQstatus(d)
-      // if status == ConnStatusType.CONNECTION_BAD
-      // then RoachError.ConnectionIsDown(currentConnectionError).raise
+      if status == ConnStatusType.CONNECTION_BAD
+      then RoachError.ConnectionIsDown(currentConnectionError).raise
 
     def execute(query: String)(using Zone): Validated[Result] =
-      checkConnection()
       val cstr = toCString(query)
       val res = PQexec(d, cstr)
       val status = PQresultStatus(res)
@@ -71,7 +70,6 @@ object Database:
     end execute
 
     def command(query: String)(using Zone): Unit =
-      checkConnection()
       Using.resource(d.execute(query).getOrThrow) { res =>
         res.status
       }
@@ -81,7 +79,6 @@ object Database:
         statementName: String,
         codec: Codec[T]
     )(using z: Zone, oids: OidMapping = OidMapping): Validated[Prepared[T]] =
-      checkConnection()
       val nParams = codec.length
       val paramTypes = stackalloc[Oid](nParams)
       for l <- 0 until nParams do paramTypes(l) = oids.map(codec.accepts(l))
@@ -102,7 +99,6 @@ object Database:
         codec: Codec[T],
         data: T
     )(using z: Zone, oids: OidMapping = OidMapping): Validated[Result] =
-      checkConnection()
       val nParams = codec.length
       val paramTypes = stackalloc[Oid](nParams)
       for l <- 0 until nParams do paramTypes(l) = oids.map(codec.accepts(l))
@@ -130,7 +126,6 @@ object Database:
         z: Zone,
         oids: OidMapping = OidMapping
     ): Validated[Result] =
-      checkConnection()
       val nParams = codec.length
       val paramTypes = stackalloc[Oid](nParams)
       val encoder = codec.encode(values)
