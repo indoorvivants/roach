@@ -16,8 +16,9 @@ object Migrate:
     pool.withLease { db ?=>
 
       db.command("BEGIN")
-      db.command(s"LOCK TABLE $tableName IN ACCESS EXCLUSIVE MODE")
+
       try
+        db.command(s"LOCK TABLE $tableName IN ACCESS EXCLUSIVE MODE")
         val current = readAll(tableName)
         present.addAll(current.map(_._2))
 
@@ -31,15 +32,11 @@ object Migrate:
         val state =
           s"Recorded migrations in DB: `${current.render}`, " + s"migrations expected: `${expected.render}`"
 
-        assert(
-          expected.startsWith(current),
-          s"Migration state is inconsistent!\n$state"
-        )
+        if !expected.startsWith(current) then
+          RoachError.MigrationStateInconsistent.wrongPrefix(state).raise
 
-        assert(
-          current.length <= expected.length,
-          s"Migration state is inconsistent (database is AHEAD and contains migrations NOT passed to Migrate)\n$state"
-        )
+        if current.length > expected.length then
+          RoachError.MigrationStateInconsistent.databaseIsAhead(state).raise
 
         val unapplied = files.drop(current.length)
 
@@ -55,18 +52,17 @@ object Migrate:
               ).exec(rf.filename)
               applied.addOne(rf.filename)
             catch
-              case exc: RoachFatalException =>
+              case exc: RoachError =>
                 rollback = true
                 throw exc
             end try
 
         }
       catch
-        case exc: RoachFatalException =>
-          throw new RoachFatalException(
-            s"Migration was aborted due to a failure, the following migrations will be rolled back: `${applied.result().mkString(", ")}`",
-            Some(exc)
-          )
+        case exc =>
+          RoachError
+            .MigrationAbortedWithReason(applied.result(), exc)
+            .raise
       finally db.execute("COMMIT")
       end try
     }

@@ -11,10 +11,6 @@ import scala.util.Try
 import scala.util.Using
 import scala.util.Using.Releasable
 
-class RoachException(msg: String) extends Exception(msg)
-class RoachFatalException(msg: String, cause: Option[Throwable] = None)
-    extends Exception(msg, cause.orNull)
-
 opaque type Database = Ptr[PGconn]
 
 object Database:
@@ -25,10 +21,13 @@ object Database:
     val conn = PQconnectdb(connString)
 
     if PQstatus(conn) != ConnStatusType.CONNECTION_OK then
-      val res = Validated.error(conn.currentError)
+      val res = Validated.error(
+        RoachError.ConnectionIsDown(conn.currentConnectionError)
+      )
       PQfinish(conn)
       res
     else Validated(conn)
+  end apply
 
   import Validated.*
   import Result.given
@@ -37,18 +36,14 @@ object Database:
 
     def connectionIsOkay: Boolean =
       val status = PQstatus(d)
-      status != ConnStatusType.CONNECTION_NEEDED && status != ConnStatusType.CONNECTION_BAD
+      status == ConnStatusType.CONNECTION_OK
 
     def checkConnection(): Unit =
       val status = PQstatus(d)
-      if status == ConnStatusType.CONNECTION_NEEDED || status == ConnStatusType.CONNECTION_BAD
-      then
-        throw new RoachFatalException(
-          s"Postgres connection is down: ${currentError}"
-        )
+      if status == ConnStatusType.CONNECTION_BAD
+      then RoachError.ConnectionIsDown(currentConnectionError).raise
 
     def execute(query: String)(using Zone): Validated[Result] =
-      checkConnection()
       val cstr = toCString(query)
       val res = PQexec(d, cstr)
       val status = PQresultStatus(res)
@@ -58,15 +53,23 @@ object Database:
           status == PGRES_NONFATAL_ERROR ||
           status == PGRES_FATAL_ERROR
 
+      val wrapped = Result(res)
+
       if failed then
-        val ret = Validated.error(currentError)
+        val ret =
+          Validated.error(
+            RoachError.QueryExecutionFailed(
+              wrapped.resultError,
+              wrapped.sqlstate
+            )
+          )
         PQclear(res)
         ret
-      else Validated(Result(res))
+      else Validated(wrapped)
+      end if
     end execute
 
     def command(query: String)(using Zone): Unit =
-      checkConnection()
       Using.resource(d.execute(query).getOrThrow) { res =>
         res.status
       }
@@ -76,7 +79,6 @@ object Database:
         statementName: String,
         codec: Codec[T]
     )(using z: Zone, oids: OidMapping = OidMapping): Validated[Prepared[T]] =
-      checkConnection()
       val nParams = codec.length
       val paramTypes = stackalloc[Oid](nParams)
       for l <- 0 until nParams do paramTypes(l) = oids.map(codec.accepts(l))
@@ -97,7 +99,6 @@ object Database:
         codec: Codec[T],
         data: T
     )(using z: Zone, oids: OidMapping = OidMapping): Validated[Result] =
-      checkConnection()
       val nParams = codec.length
       val paramTypes = stackalloc[Oid](nParams)
       for l <- 0 until nParams do paramTypes(l) = oids.map(codec.accepts(l))
@@ -125,7 +126,6 @@ object Database:
         z: Zone,
         oids: OidMapping = OidMapping
     ): Validated[Result] =
-      checkConnection()
       val nParams = codec.length
       val paramTypes = stackalloc[Oid](nParams)
       val encoder = codec.encode(values)
@@ -150,7 +150,7 @@ object Database:
     inline def unsafely[A](f: Ptr[PGconn] => A): A =
       f(d)
 
-    private[roach] def currentError: String =
+    private[roach] def currentConnectionError: String =
       fromCString(PQerrorMessage(d))
 
     private[roach] def executePrepared(
@@ -188,7 +188,9 @@ object Database:
 
       if failed then
         res.clear()
-        Validated.error(currentError)
+        Validated.error(
+          RoachError.QueryExecutionFailed(res.resultError, res.sqlstate)
+        )
       else Validated(res)
     end result
 
