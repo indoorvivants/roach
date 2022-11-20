@@ -102,7 +102,7 @@ class MigrationTests extends munit.FunSuite, TestHarness:
           )
 
           // prefixes don't match
-          intercept[java.lang.AssertionError] {
+          intercept[RoachError.MigrationAbortedWithReason] {
             Migrate.all(pool, tableName = tst)(
               ResourceFile("/test_1.2.sql"),
               ResourceFile("/test_1.1.sql"),
@@ -111,7 +111,7 @@ class MigrationTests extends munit.FunSuite, TestHarness:
           }
 
           // database is ahead
-          intercept[java.lang.AssertionError] {
+          intercept[RoachError.MigrationAbortedWithReason] {
             Migrate.all(pool, tableName = tst)(
               ResourceFile("/test_1.1.sql"),
               ResourceFile("/test_1.2.sql")
@@ -161,7 +161,7 @@ class MigrationTests extends munit.FunSuite, TestHarness:
       val tst = "migration_test_1"
       Pool.single(connectionString) { pool =>
         cleanup(pool)(tst, "howdy") { () =>
-          intercept[RoachFatalException] {
+          intercept[RoachError.MigrationAbortedWithReason] {
             Migrate.all(pool, tableName = tst)(
               ResourceFile("/test_1.1.sql"),
               ResourceFile("/test_1.2.sql"),
@@ -196,7 +196,7 @@ class MigrationTests extends munit.FunSuite, TestHarness:
             ResourceFile("/test_1.2.sql")
           )
 
-          intercept[RoachFatalException] {
+          intercept[RoachError] {
             Migrate.all(pool, tableName = tst)(
               ResourceFile("/test_1.1.sql"),
               ResourceFile("/test_1.2.sql"),

@@ -9,15 +9,24 @@ import libpq.types.*
 
 opaque type Result = Ptr[PGresult]
 object Result:
-  inline def apply(raw: Ptr[PGresult]): Result = raw
+  inline def apply(inline raw: Ptr[PGresult]): Result = raw
 
   extension (r: Result)
     inline def status: ExecStatusType = PQresultStatus(r)
 
     inline def clear(): Unit = if r != null then PQclear(r)
 
-    inline def count(): CInt = 
+    inline def count(): CInt =
       PQntuples(r)
+
+    private[roach] def sqlstate = 
+      val errstate = PQresultErrorField(r, PG_DIAG.PG_DIAG_SQLSTATE)
+
+      if errstate != null then SQLSTATE.lookup(fromCString(errstate))
+      else None
+
+    private[roach] def resultError: String =
+      fromCString(PQresultErrorMessage(r))
 
     private[roach] def rows: (Vector[(Oid, String)], Vector[Vector[String]]) =
       val nFields = PQnfields(r)
@@ -51,19 +60,22 @@ object Result:
       val tuples = Vector.newBuilder[A]
 
       if (codec.length != PQnfields(r)) then
-        throw new RoachException(
-          s"Provided codec is for ${codec.length} fields, while the result has ${PQnfields(r)} fields"
-        )
+        RoachError.CodecQueryLengthMismatch(codec.length, PQnfields(r)).raise
 
       (0 until nFields).foreach { offset =>
         val expectedType = oids.rev(PQftype(r, offset))
         val fieldName = fromCString(PQfname(r, offset))
 
         if codec.accepts(offset) != expectedType then
-          throw new RoachException(
-            s"$offset: Field $fieldName is of type '$expectedType', " +
-              s"but the decoder only accepts '${codec.accepts(offset)}'"
-          )
+          RoachError
+            .CodecFieldTypeMismatch(
+              offset,
+              fieldName,
+              expectedType,
+              codec.accepts(offset)
+            )
+            .raise
+        end if
       }
 
       (0 until nTuples).foreach { row =>
@@ -75,7 +87,7 @@ object Result:
       tuples.result
     end readAll
 
-    inline def use[A](f: Result => A) = 
+    inline def use[A](f: Result => A) =
       Using.resource(r)(f)
   end extension
 

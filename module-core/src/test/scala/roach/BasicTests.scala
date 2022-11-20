@@ -137,7 +137,7 @@ class BasicTests extends munit.FunSuite, TestHarness:
     }
   }
 
-  test("single slot pool") {
+  test("single slot pool".only) {
     zone {
       Pool.single(connectionString) { pool =>
         var old: Database | Null = null
@@ -147,8 +147,16 @@ class BasicTests extends munit.FunSuite, TestHarness:
           findPid()(using db)
         }
 
-        pool.lease { db =>
-          terminatePid(pid)(using db)
+        intercept[RoachError.QueryExecutionFailed] {
+          pool.withLease { db ?=>
+            terminatePid(pid)(using db)
+
+            val exc = sql"select * from pg_type".count()
+          }
+        }
+
+        pool.withLease { db ?=>
+          println(sql"select * from pg_type".count())
         }
 
         assert(!old.nn.connectionIsOkay)
