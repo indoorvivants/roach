@@ -34,8 +34,7 @@ private[roach] class Single private (var slot: Slot, connString: CString)
             case rfe: RoachError.ConnectionIsDown =>
               slot = Slot.Empty
               throw rfe
-          finally 
-            if slot != Slot.Empty then slot = Slot.Available(db)
+          finally if slot != Slot.Empty then slot = Slot.Available(db)
           result.nn
         else
           slot = Slot.Available(reconnect().getOrThrow)

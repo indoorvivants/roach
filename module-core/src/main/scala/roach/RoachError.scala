@@ -47,4 +47,3 @@ object RoachError:
     def wrongPrefix(state: String) =
       apply(s"Migration state is inconsistent!", state)
 end RoachError
-
