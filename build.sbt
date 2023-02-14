@@ -50,7 +50,7 @@ lazy val circe =
     .in(file("module-circe"))
     .dependsOn(core % "compile->compile;test->test")
     .enablePlugins(ScalaNativePlugin, VcpkgPlugin, BindgenPlugin)
-    .settings(libraryDependencies += "io.circe" %%% "circe-parser" % "0.14.3")
+    .settings(libraryDependencies += "io.circe" %%% "circe-parser" % "0.14.4")
     .settings(moduleName := "circe")
     .settings(common)
 
