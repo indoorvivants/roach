@@ -19,7 +19,7 @@ object Result:
     inline def count(): CInt =
       PQntuples(r)
 
-    private[roach] def sqlstate = 
+    private[roach] def sqlstate =
       val errstate = PQresultErrorField(r, PG_DIAG.PG_DIAG_SQLSTATE)
 
       if errstate != null then SQLSTATE.lookup(fromCString(errstate))
@@ -59,7 +59,7 @@ object Result:
       val nTuples = PQntuples(r)
       val tuples = Vector.newBuilder[A]
 
-      if (codec.length != PQnfields(r)) then
+      if codec.length != PQnfields(r) then
         RoachError.CodecQueryLengthMismatch(codec.length, PQnfields(r)).raise
 
       (0 until nFields).foreach { offset =>

@@ -25,8 +25,8 @@ object codecs:
   val oid =
     int4.bimap[Oid](i => Oid(i.toUInt), _.asInstanceOf[CUnsignedInt].toInt)
 
-  inline def bpchar(n: Int)          = textual(s"bpchar($n)")
-  inline def varchar(n: Int)         = textual(s"varchar($n)")
+  inline def bpchar(n: Int) = textual(s"bpchar($n)")
+  inline def varchar(n: Int) = textual(s"varchar($n)")
 
   private def textual(nm: String) = stringLike[String](nm)(identity)
 end codecs

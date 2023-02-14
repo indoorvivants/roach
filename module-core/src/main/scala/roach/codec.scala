@@ -27,7 +27,7 @@ private[roach] class AppendCodec[A <: Tuple, B](a: Codec[A], b: Codec[B])
     extends Codec[Tuple.Concat[A, (B *: EmptyTuple)]]:
   type T = Tuple.Concat[A, (B *: EmptyTuple)]
   def accepts(offset: Int) =
-    if (offset < a.length) then a.accepts(offset)
+    if offset < a.length then a.accepts(offset)
     else b.accepts(offset - a.length)
 
   def length = a.length + b.length
@@ -43,7 +43,7 @@ private[roach] class AppendCodec[A <: Tuple, B](a: Codec[A], b: Codec[B])
     val rightEncode = b.encode(right._1)
 
     (offset: Int) =>
-      if (offset + 1 > a.length) then rightEncode(offset - a.length)
+      if offset + 1 > a.length then rightEncode(offset - a.length)
       else leftEncode(offset)
 
   override def toString() =
@@ -55,7 +55,7 @@ private[roach] class CombineCodec[A, B](a: Codec[A], b: Codec[B])
     extends Codec[(A, B)]:
   type T = (A, B)
   def accepts(offset: Int) =
-    if (offset < a.length) then a.accepts(offset)
+    if offset < a.length then a.accepts(offset)
     else b.accepts(offset - a.length)
 
   def length = a.length + b.length
@@ -70,7 +70,7 @@ private[roach] class CombineCodec[A, B](a: Codec[A], b: Codec[B])
     val rightEncode = b.encode(value._2)
 
     (offset: Int) =>
-      if (offset + 1 > a.length) then rightEncode(offset - a.length)
+      if offset + 1 > a.length then rightEncode(offset - a.length)
       else leftEncode(offset)
 
   override def toString() =
@@ -104,7 +104,9 @@ object Codec:
       CombineCodec(d, other)
   end extension
 
-  def stringLike[A](accept: String)(f: String => A, g: A => String = (_: A).toString): Codec[A] =
+  def stringLike[A](
+      accept: String
+  )(f: String => A, g: A => String = (_: A).toString): Codec[A] =
     new Codec[A]:
       inline def length: Int = 1
       inline def accepts(offset: Int) = accept
@@ -131,6 +133,3 @@ object Iso:
       mir.fromProduct(a)
     def invert(a: A) =
       Tuple.fromProduct(a.asInstanceOf[Product]).asInstanceOf[X]
-
-
-
