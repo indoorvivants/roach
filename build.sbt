@@ -5,6 +5,10 @@ Global / onChangedBuildSource := ReloadOnSourceChanges
 
 val Versions = new {
   val Scala = "3.2.2"
+
+  val circe = "0.14.4"
+
+  val munit = "1.0.0-M7"
 }
 
 import bindgen.interface.*
@@ -19,7 +23,7 @@ lazy val core =
       ScalaNativePlugin,
       ScalaNativeJUnitPlugin,
       BindgenPlugin,
-      VcpkgPlugin
+      VcpkgNativePlugin
     )
     .settings(common)
     .settings(
@@ -27,15 +31,16 @@ lazy val core =
       Compile / bindgenBindings += {
         val configurator = vcpkgConfigurator.value
 
-        Binding(
-          configurator.includes("libpq") / "libpq-fe.h",
-          "libpq",
-          linkName = Some("pq"),
-          cImports = List("libpq-fe.h"),
-          clangFlags = configurator.pkgConfig
-            .updateCompilationFlags(List("-std=gnu99"), "libpq")
-            .toList
-        )
+        Binding
+          .builder(configurator.includes("libpq") / "libpq-fe.h", "libpq")
+          .withLinkName("pq")
+          .addCImport("libpq-fe.h")
+          .withClangFlags(
+            configurator.pkgConfig
+              .updateCompilationFlags(List("-std=gnu99"), "libpq")
+              .toList
+          )
+          .build
       },
       moduleName := "core",
       Compile / packageSrc / mappings ++= {
@@ -49,18 +54,20 @@ lazy val circe =
   project
     .in(file("module-circe"))
     .dependsOn(core % "compile->compile;test->test")
-    .enablePlugins(ScalaNativePlugin, VcpkgPlugin, BindgenPlugin)
-    .settings(libraryDependencies += "io.circe" %%% "circe-parser" % "0.14.4")
+    .enablePlugins(ScalaNativePlugin, VcpkgNativePlugin, BindgenPlugin)
+    .settings(
+      libraryDependencies += "io.circe" %%% "circe-parser" % Versions.circe
+    )
     .settings(moduleName := "circe")
     .settings(common)
 
 val common = Seq(
   organization := "com.indoorvivants.roach",
   scalaVersion := Versions.Scala,
-  libraryDependencies += "org.scalameta" %%% "munit" % "1.0.0-M7" % Test,
+  libraryDependencies += "org.scalameta" %%% "munit" % Versions.munit % Test,
   resolvers ++= Resolver.sonatypeOssRepos("snapshots"),
   vcpkgDependencies := Set("libpq")
-) ++ vcpkgNativeConfig() ++ vcpkgNativeConfig(conf = Test)
+)
 
 lazy val docs =
   project
@@ -81,72 +88,6 @@ lazy val docs =
 
       }
     )
-
-def vcpkgNativeConfig(
-    rename: String => String = identity,
-    conf: Configuration = Compile
-) = Seq(
-  conf / nativeConfig := {
-    import com.indoorvivants.detective.Platform
-    val configurator = vcpkgConfigurator.value
-    val conf = nativeConfig.value
-    val deps = vcpkgDependencies.value.toSeq.map(rename)
-
-    val files = deps.map(d => configurator.files(d))
-
-    val compileArgsApprox = files.flatMap { f =>
-      List("-I" + f.includeDir.toString)
-    }
-    val linkingArgsApprox = files.flatMap { f =>
-      List("-L" + f.libDir) ++ f.staticLibraries.map(_.toString)
-    }
-
-    import scala.util.control.NonFatal
-
-    def updateLinkingFlags(current: Seq[String], deps: String*) =
-      try {
-        configurator.pkgConfig.updateLinkingFlags(
-          Seq.empty,
-          deps*
-        ) ++ current
-      } catch {
-        case NonFatal(exc) =>
-          linkingArgsApprox ++ current
-      }
-
-    def updateCompilationFlags(current: Seq[String], deps: String*) =
-      try {
-        configurator.pkgConfig.updateCompilationFlags(
-          Seq.empty,
-          deps*
-        ) ++ current
-      } catch {
-        case NonFatal(exc) =>
-          compileArgsApprox ++ current
-      }
-
-    val arch64 =
-      if (
-        Platform.arch == Platform.Arch.Arm && Platform.bits == Platform.Bits.x64
-      )
-        List("-arch", "arm64")
-      else Nil
-
-    conf
-      .withLinkingOptions(
-        updateLinkingFlags(
-          conf.linkingOptions ++ arch64,
-          deps*
-        )
-      )
-      .withCompileOptions(
-        updateCompilationFlags(
-          conf.compileOptions ++ arch64,
-          deps*
-        )
-      )
-  }
-)
 
 inThisBuild(
   Seq(
