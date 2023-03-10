@@ -6,7 +6,7 @@ Global / onChangedBuildSource := ReloadOnSourceChanges
 val Versions = new {
   val Scala = "3.2.2"
 
-  val circe = "0.14.4"
+  val circe = "0.14.5"
 
   val munit = "1.0.0-M7"
 }
