@@ -8,7 +8,7 @@ val Versions = new {
 
   val circe = "0.14.5"
 
-  val munit = "1.0.0-M7"
+  val munit = "1.0.0-M8"
 }
 
 import bindgen.interface.*
