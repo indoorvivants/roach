@@ -178,7 +178,7 @@ class BasicTests extends munit.FunSuite, TestHarness:
     }
   }
 
-  test("execute params") {
+  test("execute error params") {
     zone {
       withDB { db ?=>
         db.executeParams(
@@ -191,6 +191,26 @@ class BasicTests extends munit.FunSuite, TestHarness:
 
             assert(row.contains(16))
           }
+      }
+    }
+  }
+
+  test("execute error capturing") {
+    zone {
+      withDB { db ?=>
+        val msg = db
+          .executeParams(
+            "select oid::int4! from pg_type where typname = $1",
+            varchar,
+            "bool"
+          )
+          .either
+          .left
+          .get
+          .message
+          .toLowerCase()
+
+        assert(msg.contains("syntax error at or near"))
       }
     }
   }
