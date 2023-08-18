@@ -187,9 +187,10 @@ object Database:
           status == PGRES_FATAL_ERROR
 
       if failed then
+        val error = res.resultError
         res.clear()
         Validated.error(
-          RoachError.QueryExecutionFailed(res.resultError, res.sqlstate)
+          RoachError.QueryExecutionFailed(error, res.sqlstate)
         )
       else Validated(res)
     end result
