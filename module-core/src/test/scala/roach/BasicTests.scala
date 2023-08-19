@@ -14,6 +14,7 @@ class BasicTests extends munit.FunSuite, TestHarness:
   override protected def tableCreationSQL: Option[String => String] =
     Some(tableName => s"""
     CREATE TABLE $tableName(
+      id varchar not null,
       f_int2 int2 not null,
       f_int4 int4 not null,
       f_int8 int8 not null,
@@ -22,7 +23,16 @@ class BasicTests extends munit.FunSuite, TestHarness:
       f_uid uuid not null,
       f_float float4 not null,
       f_double float8 not null,
-      f_bool bool not null
+      f_bool bool not null,
+      o_int2 int2 ,
+      o_int4 int4 ,
+      o_int8 int8 ,
+      o_varchar varchar ,
+      o_text text ,
+      o_uid uuid ,
+      o_float float4 ,
+      o_double float8 ,
+      o_bool bool 
     )
     """)
 
@@ -66,6 +76,7 @@ class BasicTests extends munit.FunSuite, TestHarness:
 
   test("codecs") {
     case class Row(
+        id: String,
         short: Short,
         int: Int,
         long: Long,
@@ -74,40 +85,63 @@ class BasicTests extends munit.FunSuite, TestHarness:
         uid: UUID,
         float: Float,
         double: Double,
-        bool: Boolean
+        bool: Boolean,
+        o_short: Option[Short],
+        o_int: Option[Int],
+        o_long: Option[Long],
+        o_vc: Option[String],
+        o_txt: Option[String],
+        o_uid: Option[UUID],
+        o_float: Option[Float],
+        o_double: Option[Double],
+        o_bool: Option[Boolean]
     )
     val codec =
-      int2 ~ int4 ~ int8 ~ varchar ~ text ~ uuid ~ float4 ~ float8 ~ bool
+      (varchar ~ int2 ~ int4 ~ int8 ~ varchar ~ text ~ uuid ~ float4 ~ float8 ~ bool ~
+        int2.opt ~ int4.opt ~ int8.opt ~ varchar.opt ~ text.opt ~ uuid.opt ~ float4.opt ~ float8.opt ~ bool.opt)
 
     val rowCodec = codec.as[Row]
 
     zone {
       withDB { db ?=>
-        val row = Row(
-          Short.MaxValue,
-          Int.MaxValue,
-          Long.MaxValue,
-          "varchar",
-          "text",
-          UUID.fromString("5D7BC610-17DF-460F-BCA9-AADB391A252D"),
-          Float.MaxValue,
-          Double.MaxValue,
-          false
+        def row(opt: Boolean) = Row(
+          id = s"opt_$opt",
+          short = Short.MaxValue,
+          int = Int.MaxValue,
+          long = Long.MaxValue,
+          vc = "varchar",
+          txt = "text",
+          uid = UUID.fromString("5D7BC610-17DF-460F-BCA9-AADB391A252D"),
+          float = Float.MaxValue,
+          double = Double.MaxValue,
+          bool = false,
+          o_short = Some(Short.MaxValue).filter(_ => opt),
+          o_int = Some(Int.MaxValue).filter(_ => opt),
+          o_long = Some(Long.MaxValue).filter(_ => opt),
+          o_vc = Some("varchar").filter(_ => opt),
+          o_txt = Some("text").filter(_ => opt),
+          o_uid = Some(UUID.fromString("5D7BC610-17DF-460F-BCA9-AADB391A252D"))
+            .filter(_ => opt),
+          o_float = Some(Float.MaxValue).filter(_ => opt),
+          o_double = Some(Double.MaxValue).filter(_ => opt),
+          o_bool = Some(true).filter(_ => opt)
         )
 
-        // TODO: figure out a better way of doing this
-        db.executeParams(
-          s"insert into $tableName values(${List.tabulate(rowCodec.length)(n => "$" + (n + 1)).mkString(", ")})",
-          rowCodec,
-          row
-        ).getOrThrow
+        List(row(true), row(false)).foreach { r =>
+          // TODO: figure out a better way of doing this
+          db.executeParams(
+            s"insert into $tableName values(${List
+                .tabulate(rowCodec.length)(n => "$" + (n + 1))
+                .mkString(", ")})",
+            rowCodec,
+            r
+          ).getOrThrow
 
-        val result = db
-          .execute(s"select * from $tableName")
-          .getOrThrow
-          .use(_.readOne(rowCodec))
+          val result = sql"select * from $tableName where id = $varchar"
+            .one(r.id, rowCodec)
 
-        assertEquals(result, Some(row))
+          assertEquals(clue(result), Some(clue(r)))
+        }
       }
     }
   }

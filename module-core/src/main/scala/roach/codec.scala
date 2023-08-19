@@ -11,17 +11,33 @@ trait Codec[T]:
   self =>
   def accepts(idx: Int): String
   def length: Int
-  def decode(get: Int => CString)(using Zone): T
+  def decode(get: Int => CString, isNull: Int => Boolean)(using Zone): T
   def encode(value: T): Int => Zone ?=> CString
+
   def bimap[B](f: T => B, g: B => T): Codec[B] =
     new Codec[B]:
       def accepts(offset: Int) = self.accepts(offset)
       def length = self.length
-      def decode(get: Int => CString)(using Zone) =
-        f(self.decode(get))
+      def decode(get: Int => CString, isNull: Int => Boolean)(using Zone) =
+        f(self.decode(get, isNull))
       def encode(value: B) =
         self.encode(g(value))
 end Codec
+
+trait ValueCodec[T] extends Codec[T]:
+  self =>
+  def opt: Codec[Option[T]] = new Codec[Option[T]]:
+    override def accepts(idx: Int): String = self.accepts(idx)
+    override def length: Int = self.length
+    def decode(get: Int => CString, isNull: Int => Boolean)(using Zone) =
+      Option.when(!isNull(0))(self.decode(get, isNull))
+
+    override def encode(value: Option[T]): Int => (Zone) ?=> CString =
+      value match
+        case None    => _ => null
+        case Some(v) => self.encode(v)
+
+end ValueCodec
 
 private[roach] class AppendCodec[A <: Tuple, B](a: Codec[A], b: Codec[B])
     extends Codec[Tuple.Concat[A, (B *: EmptyTuple)]]:
@@ -32,9 +48,12 @@ private[roach] class AppendCodec[A <: Tuple, B](a: Codec[A], b: Codec[B])
 
   def length = a.length + b.length
 
-  def decode(get: Int => CString)(using Zone): T =
-    val left = a.decode(get)
-    val right = b.decode((i: Int) => get(i + a.length))
+  def decode(get: Int => CString, isNull: Int => Boolean)(using Zone): T =
+    val left = a.decode(get, isNull)
+    val right = b.decode(
+      (i: Int) => get(i + a.length),
+      (i: Int) => isNull(i + a.length)
+    )
     left ++ (right *: EmptyTuple)
 
   def encode(value: T) =
@@ -60,9 +79,10 @@ private[roach] class CombineCodec[A, B](a: Codec[A], b: Codec[B])
 
   def length = a.length + b.length
 
-  def decode(get: Int => CString)(using Zone): T =
-    val left = a.decode(get)
-    val right = b.decode((i: Int) => get(i + a.length))
+  def decode(get: Int => CString, isNull: Int => Boolean)(using Zone): T =
+    val left = a.decode(get, isNull)
+    val right =
+      b.decode((i: Int) => get(i + a.length), (i: Int) => isNull(i + a.length))
     (left, right)
 
   def encode(value: T) =
@@ -91,8 +111,8 @@ object Codec:
         def accepts(offset: Int) =
           d.accepts(offset)
         def length = d.length
-        def decode(get: Int => CString)(using Zone) =
-          iso.convert(d.decode(get))
+        def decode(get: Int => CString, isNull: Int => Boolean)(using Zone) =
+          iso.convert(d.decode(get, isNull))
 
         def encode(value: T) =
           d.encode(iso.invert(value))
@@ -106,18 +126,18 @@ object Codec:
 
   def stringLike[A](
       accept: String
-  )(f: String => A, g: A => String = (_: A).toString): Codec[A] =
-    new Codec[A]:
+  )(f: String => A, g: A => String = (_: A).toString): ValueCodec[A] =
+    new ValueCodec[A]:
       inline def length: Int = 1
       inline def accepts(offset: Int) = accept
 
-      def decode(get: Int => CString)(using Zone) =
+      def decode(get: Int => CString, isNull: Int => Boolean)(using Zone) =
         f(fromCString(get(0)))
 
       def encode(value: A) =
         _ => toCString(g(value))
 
-      override def toString() = s"Decode[$accept]"
+      override def toString() = s"ValueCodec[$accept]"
 
 end Codec
 

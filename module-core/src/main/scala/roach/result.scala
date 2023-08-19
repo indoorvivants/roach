@@ -79,9 +79,12 @@ object Result:
       }
 
       (0 until nTuples).foreach { row =>
-        val func =
-          (i: Int) => PQgetvalue(r, row, i) // -> PQgetlength(r, row, i)
-        tuples.addOne(codec.decode(func))
+        val get =
+          (i: Int) => PQgetvalue(r, row, i)
+
+        val isNull =
+          (i: Int) => PQgetisnull(r, row, i) != 0
+        tuples.addOne(codec.decode(get, isNull))
       }
 
       tuples.result
