@@ -13,6 +13,26 @@ class SqlInterpolatorTests extends munit.FunSuite, TestHarness:
     insert into $tableName values(42, 'bye');
     """)
 
+  test("fragments") {
+    zone {
+      withDB {
+        val fr1 = Fragment("key,value")
+        val q = sql"select $fr1 from $tableName where key = 25".all(int4 ~ text)
+
+        assertEquals(q, Vector(25 -> "hello"))
+
+        val fr2 = fr1.applied(int4 ~ text)
+
+        val q1 =
+          sql"insert into $tableName(${fr2.sql}) values ($fr2) returning key"
+
+        val result = q1.one(125 -> "yo", int4)
+
+        assertEquals(result, Some(125))
+      }
+    }
+  }
+
   test("basics") {
     zone {
       withDB {

@@ -6,6 +6,29 @@ extension (inline ctx: StringContext)
   transparent inline def sql(inline args: Any*): Any =
     ${ MacroImpl.sql('ctx, 'args) }
 
+  // transparent inline def fr(inline args: Any*): Any =
+  //   ${ MacroImpl.sql('ctx, 'args) }
+
+trait Fragment:
+  def sql: String
+  def applied[T](codec: Codec[T]): AppliedFragment[T]
+
+object Fragment:
+  private class Impl(val sql: String) extends Fragment:
+    def applied[T](codec: Codec[T]): AppliedFragment[T] =
+      AppliedFragment(sql, codec)
+  def apply(s: String): Fragment = Impl(s)
+
+trait AppliedFragment[T]:
+  def sql: Fragment
+  def codec: Codec[T]
+
+object AppliedFragment:
+  private class Impl[T](val sql: Fragment, val codec: Codec[T])
+      extends AppliedFragment[T]
+  def apply[T](sql: String, codec: Codec[T]): AppliedFragment[T] =
+    Impl(Fragment(sql), codec)
+
 private[roach] object MacroImpl:
   def sql(strCtxExpr: Expr[StringContext], argsExpr: Expr[Seq[Any]])(using
       Quotes
@@ -26,6 +49,15 @@ private[roach] object MacroImpl:
       case '{ $other: String } =>
         segmentBuilders.addOne('{
           Right($other)
+        })
+      case '{ $e: Fragment } =>
+        segmentBuilders.addOne('{
+          Right($e.sql)
+        })
+      case '{ $e: AppliedFragment[t] } =>
+        codecsBuilder.addOne('{ $e.codec })
+        segmentBuilders.addOne('{
+          Left($e.codec.length)
         })
       case o =>
         quotes.reflect.report.errorAndAbort(
