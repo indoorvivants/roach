@@ -9,12 +9,17 @@ val Versions = new {
   val circe = "0.14.5"
 
   val munit = "1.0.0-M8"
+
+  val upickle = "3.1.0"
 }
 
 import bindgen.interface.*
 
 lazy val root =
-  project.in(file(".")).aggregate(core, circe).settings(publish / skip := true)
+  project
+    .in(file("."))
+    .aggregate(core, circe, upickle)
+    .settings(publish / skip := true)
 
 lazy val core =
   project
@@ -49,6 +54,17 @@ lazy val core =
         files.map { f => (f, f.relativeTo(base).get.getPath) }
       }
     )
+
+lazy val upickle =
+  project
+    .in(file("module-upickle"))
+    .dependsOn(core % "compile->compile;test->test")
+    .enablePlugins(ScalaNativePlugin, VcpkgNativePlugin, BindgenPlugin)
+    .settings(
+      libraryDependencies += "com.lihaoyi" %%% "upickle" % Versions.upickle
+    )
+    .settings(moduleName := "upickle")
+    .settings(common)
 
 lazy val circe =
   project
