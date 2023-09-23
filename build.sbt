@@ -4,9 +4,9 @@ import java.nio.file.Paths
 Global / onChangedBuildSource := ReloadOnSourceChanges
 
 val Versions = new {
-  val Scala = "3.2.2"
+  val Scala = "3.3.1"
 
-  val circe = "0.14.5"
+  val circe = "0.14.6"
 
   val munit = "1.0.0-M8"
 
@@ -47,12 +47,11 @@ lazy val core =
           )
           .build
       },
-      moduleName := "core",
-      Compile / packageSrc / mappings ++= {
-        val base = (Compile / sourceManaged).value
-        val files = (Compile / managedSources).value
-        files.map { f => (f, f.relativeTo(base).get.getPath) }
-      }
+      bindgenMode := BindgenMode.Manual(
+        sourceDirectory.value / "main" / "scala" / "generated",
+        (Compile / resourceDirectory).value / "scala-native"
+      ),
+      moduleName := "core"
     )
 
 lazy val upickle =
