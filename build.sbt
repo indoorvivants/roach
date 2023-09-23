@@ -47,12 +47,11 @@ lazy val core =
           )
           .build
       },
-      moduleName := "core",
-      Compile / packageSrc / mappings ++= {
-        val base = (Compile / sourceManaged).value
-        val files = (Compile / managedSources).value
-        files.map { f => (f, f.relativeTo(base).get.getPath) }
-      }
+      bindgenMode := BindgenMode.Manual(
+        sourceDirectory.value / "main" / "scala" / "generated",
+        (Compile / resourceDirectory).value / "scala-native"
+      ),
+      moduleName := "core"
     )
 
 lazy val upickle =
