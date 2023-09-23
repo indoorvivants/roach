@@ -4,9 +4,9 @@ import java.nio.file.Paths
 Global / onChangedBuildSource := ReloadOnSourceChanges
 
 val Versions = new {
-  val Scala = "3.2.2"
+  val Scala = "3.3.1"
 
-  val circe = "0.14.5"
+  val circe = "0.14.6"
 
   val munit = "1.0.0-M8"
 
