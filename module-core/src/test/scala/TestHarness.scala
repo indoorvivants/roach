@@ -10,6 +10,7 @@ trait TestHarness:
   self: munit.FunSuite =>
   protected def appName =
     s"roach_tests${getClass().getSimpleName().replaceAllLiterally("$", "_")}"
+
   val connectionString =
     s"postgresql://postgres:mysecretpassword@localhost:5432/postgres?application_name=$appName"
 
