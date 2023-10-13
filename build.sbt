@@ -89,7 +89,7 @@ lazy val docs =
     .in(file("target/.docs-target"))
     .enablePlugins(MdocPlugin)
     .settings(scalaVersion := Versions.Scala)
-    .dependsOn(core, circe)
+    .dependsOn(core, circe, upickle)
     .settings(
       publish / skip := true,
       Compile / resourceGenerators += Def.task {
@@ -125,3 +125,5 @@ inThisBuild(
     )
   )
 )
+
+addCommandAlias("checkDocs", "docs/mdoc --in README.md")
