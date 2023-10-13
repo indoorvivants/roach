@@ -1,17 +1,45 @@
 # Roach
 
-A toy database access "library" for Postgres, in Scala Native.
+<!--toc:start-->
+- [Roach](#roach)
+  - [Goals](#goals)
+  - [Usage](#usage)
+    - [Basics](#basics)
+    - [`sql"..."` interpolator](#sql-interpolator)
+    - [Fragments](#fragments)
+    - [Simple JSON module (with Circe and upickle)](#simple-json-module-with-circe-and-upickle)
+    - [Migrations](#migrations)
+<!--toc:end-->
+
+A very simple database access library for Postgres, in Scala 3 Native.
+It is based on [bindings](./module-core/src/main/scala/generated/libpq.scala) to libpq produced by 
+[my binding generator](https://sn-bindgen.indoorvivants.com/)
 
 See [blog post](https://blog.indoorvivants.com/2022-03-04-twotm8-part-2-postgres-and-openssl.html) for details.
 
-This is pre-pre-pre-pre-alpha software - it was enough to create a functioning app, but it's tremendously 
+This is pre-alpha software - it is enough to create a functioning app, but it's tremendously 
 incomplete and it will take a lot of time and effort to make it usable.
+
+Examples:
+- [Twotm8](https://github.com/twotm8-com/twotm8.com/blob/main/app/src/main/scala/db.scala) - 
+  basic usage, codecs and migrations
+- [Scala Boot](https://github.com/indoorvivants/scala-boot/blob/main/mod/server/src/main/scala/Db.scala) - more advanced usage, including fragments
 
 Pre-requisites:
 
 - For runtime, `libpq5` (debian) or similar has to be installed 
-   - Unless you are linking your binary statically, of course
-- For Scala Native, LLVM has to be installed.
+   - Unless you are linking your binary statically, of course - in that case 
+     I highly recommend using sn-vcpkg: https://github.com/indoorvivants/sn-vcpkg#sbt
+- For Scala Native, Clang has to be installed.
+
+## Goals 
+
+- Direct SQL usage, no ORM
+- Minimal overhead on top of `libpq` - unless the overhead is required to improve safety and 
+  user experience
+- [Skunk](https://github.com/typelevel/skunk)-like codecs and `sql"..."` interpolator
+- Direct style (no IO monad)
+- Having fun
 
 ## Usage
 
@@ -26,7 +54,7 @@ $ docker run -p 5432:5432 -e POSTGRES_PASSWORD=mysecretpassword -d postgres
 
 ```scala mdoc:compile-only
 //> using platform "scala-native"
-//> using lib "com.indoorvivants.roach::core::0.0.2"
+//> using lib "com.indoorvivants.roach::core::0.0.6"
 
 import roach.*
 import scala.util.Using
@@ -39,45 +67,15 @@ val connectionString =
 
 Zone { implicit z =>
   Pool.single(connectionString) { pool => 
-    pool.lease { db => 
-      db.execute("select typname, typisdefined from pg_type").getOrThrow.use {
-        res =>
-          val rows: Vector[(String, Boolean)] = res.readAll(name ~ bool)
+    pool.withLease {
+       sql"select typname, typisdefined from pg_type".all(name ~ bool).foreach(println)
 
-          rows.foreach(println)
-      }
-
-      db.executeParams("select oid::int4 from pg_type where typname = $1", varchar, "bool").getOrThrow.use { res =>
-        val row: Option[Int] = res.readOne(int4)
-
-        assert(row.contains(16))
-      }
+       // with parameters now
+       val oid: Option[Int] = 
+          sql"select oid::int4 from pg_type where typname = $varchar".one("bool", int4)
     }
   }
 }
-```
-
-
-### Gratuitous `Query` abstraction
-
-This is the raw API without any macro magic. For macro magic see the `sql"..."` interpolator section below.
-
-```scala mdoc:compile-only
-import roach.*
-import roach.codecs.*
-import scalanative.unsafe.*
-
-def example(using Database, Zone) = 
-  // a query with input parameters and a result
-  Query("select count(*) from my_table where x = $1", int4).all(25, int4)
-  Query("select count(*) from my_table where x = $1", int4).one(25, int4)
-
-  // a query with no input parameters and a result
-  Query("select count(*) from my_table").all(int4)
-  Query("select count(*) from my_table").one(int4)
-
-  // a query with no input parameters and no result
-  Query("select count(*) from my_table").exec()
 ```
 
 ### `sql"..."` interpolator
@@ -125,25 +123,65 @@ def example_failure(using Database, Zone) =
 
 `sql` interpolator produces a `Query`, so you can use it as described in the previous section
 
-### Simple JSON module (with Circe)
+### Fragments
 
-Available at `com.indoorvivants.roach::circe::0.0.2` maven coordinates.
+Fragments allow you to extract certain parts of the 
+SQL query into a separate object and optionally apply 
+it to some codecs, which will become inputs in the final query
 
-```scala mdoc:compile-only
+```scala mdoc:compile-only 
 import roach.*
 import roach.codecs.*
 import scalanative.unsafe.*
 
-import roach.circe.*
+def fragments_example(using Database, Zone) = 
+    // sharing list of fields
+    val normal = Fragment("key, value")
 
-def json_example(using Database, Zone) = 
+    val q: Vector[(Int, String)] = 
+        sql"select $normal from my_table where key = 25".all(int4 ~ text)
+    
+    // sharing both list of fields, but also 
+    // indicating that this fragment 
+    // affects the input of the entire query
+    val withInput = normal.applied(int4 ~ text)
+
+    val q1 =
+      sql"insert into my_table(${withInput.sql}) values ($withInput) returning key"
+
+    val result: Option[Int] = q1.one(125 -> "yo", int4)
+```
+
+### Simple JSON module (with Circe and upickle)
+
+- **Circe**: Available at `com.indoorvivants.roach::circe::0.0.6` maven coordinates.
+- **Upickle**: Available at `com.indoorvivants.roach::upickle::0.0.6` maven coordinates.
+
+```scala mdoc:compile-only
+import roach.{upickle => _, circe => _, *}
+import roach.codecs.*
+import scalanative.unsafe.*
+
+def circe_example(using Database, Zone) = 
+  import roach.circe.*
   // returning io.circe.Json directly
-  Query("""SELECT '{"bar": "baz", "balance": 7.77, "active": false}'::json""").one(json)
+  sql"""SELECT '{"bar": "baz", "balance": 7.77, "active": false}'::json""".one(json)
 
   // returning a class with a derived codec
   case class Test(hello: String, bla: Int) derives io.circe.Codec.AsObject
-  Query("""SELECT '{"hello": "baz", "bla": 7}'::json""").one(jsonOf[Test])
+  sql"""SELECT '{"hello": "baz", "bla": 7}'::json""".one(jsonOf[Test])
+
+
+def upickle_example(using Database, Zone) = 
+  import roach.upickle.*
+  // returning ujson.Value
+  sql"""SELECT '{"bar": "baz", "balance": 7.77, "active": false}'::json""".one(json)
+
+  // returning a class with a derived codec
+  case class Test(hello: String, bla: Int) derives upickle.default.ReadWriter
+  sql"""SELECT '{"hello": "baz", "bla": 7}'::json""".one(jsonOf[Test])
 ```
+
 
 ### Migrations
 
