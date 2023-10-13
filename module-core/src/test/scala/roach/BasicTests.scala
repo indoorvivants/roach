@@ -9,6 +9,7 @@ import libpq.types.Oid
 import scala.util.Try.apply
 import scala.util.Try
 import java.util.UUID
+import scala.util.Random
 
 class BasicTests extends munit.FunSuite, TestHarness:
   override protected def tableCreationSQL: Option[String => String] =
@@ -155,7 +156,7 @@ class BasicTests extends munit.FunSuite, TestHarness:
 
   private def terminatePid(pid: Int)(using db: Database)(using Zone) =
     Try {
-      db.command(s"select pg_terminate_backend($pid)")
+      sql"select pg_terminate_backend(${pid.toString()})".one(bool)
     }
 
   test("connection status and termination") {
@@ -190,7 +191,7 @@ class BasicTests extends munit.FunSuite, TestHarness:
         }
 
         pool.withLease { db ?=>
-          println(sql"select * from pg_type".count())
+          sql"select * from pg_type".count()
         }
 
         assert(!old.nn.connectionIsOkay)
@@ -210,6 +211,29 @@ class BasicTests extends munit.FunSuite, TestHarness:
         assert(pid2 == pid3) // make sure we don't reconnect all the time
       }
     }
+  }
+
+  test("pool notice processor") {
+    val messages = List.newBuilder[String]
+    val tableName = s"my_table_bla_${Random.nextInt().abs}"
+    zone {
+      Pool.single(connectionString, s => messages.addOne(s.trim)) { pool =>
+        pool.withLease {
+
+          sql"create table if not exists $tableName(id varchar not null)"
+            .exec()
+          sql"create table if not exists $tableName(id varchar not null)"
+            .exec()
+        }
+      }
+    }
+
+    assertEquals(
+      messages.result(),
+      List(
+        s"NOTICE:  relation \"$tableName\" already exists, skipping"
+      )
+    )
   }
 
   test("execute error params") {

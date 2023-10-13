@@ -70,9 +70,7 @@ object Database:
     end execute
 
     def command(query: String)(using Zone): Unit =
-      Using.resource(d.execute(query).getOrThrow) { res =>
-        res.status
-      }
+      Using.resource(d.execute(query).getOrThrow) { res => }
 
     def prepare[T](
         query: String,

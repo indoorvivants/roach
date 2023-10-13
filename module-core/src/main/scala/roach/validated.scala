@@ -16,4 +16,10 @@ object Validated:
     inline def either: Either[RoachError, A] = v
     inline def map[B](inline f: A => B): Validated[B] =
       v.map(f)
+    inline def tap[B](inline f: A => B): Validated[A] =
+      v match
+        case Left(_)  => v
+        case Right(a) => f(a); v
+  end extension
+
 end Validated
