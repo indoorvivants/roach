@@ -10,7 +10,7 @@ val Versions = new {
 
   val munit = "1.0.0-M8"
 
-  val upickle = "3.1.3"
+  val upickle = "3.1.4"
 }
 
 import bindgen.interface.*
