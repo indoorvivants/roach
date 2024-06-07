@@ -8,9 +8,9 @@ val Versions = new {
 
   val circe = "0.14.6"
 
-  val munit = "1.0.0-M11"
+  val munit = "1.0.0"
 
-  val upickle = "3.2.0"
+  val upickle = "3.3.1"
 }
 
 import bindgen.interface.*
@@ -18,7 +18,7 @@ import bindgen.interface.*
 lazy val root =
   project
     .in(file("."))
-    .aggregate(core, circe, upickle)
+    .aggregate(core, /*circe,*/ upickle)
     .settings(publish / skip := true)
 
 lazy val core =
@@ -36,8 +36,7 @@ lazy val core =
       Compile / bindgenBindings += {
         val configurator = vcpkgConfigurator.value
 
-        Binding
-          .builder(configurator.includes("libpq") / "libpq-fe.h", "libpq")
+        Binding(configurator.includes("libpq") / "libpq-fe.h", "libpq")
           .withLinkName("pq")
           .addCImport("libpq-fe.h")
           .withClangFlags(
@@ -45,7 +44,6 @@ lazy val core =
               .updateCompilationFlags(List("-std=gnu99"), "libpq")
               .toList
           )
-          .build
       },
       bindgenMode := BindgenMode.Manual(
         sourceDirectory.value / "main" / "scala" / "generated",
@@ -65,23 +63,23 @@ lazy val upickle =
     .settings(moduleName := "upickle")
     .settings(common)
 
-lazy val circe =
-  project
-    .in(file("module-circe"))
-    .dependsOn(core % "compile->compile;test->test")
-    .enablePlugins(ScalaNativePlugin, VcpkgNativePlugin, BindgenPlugin)
-    .settings(
-      libraryDependencies += "io.circe" %%% "circe-parser" % Versions.circe
-    )
-    .settings(moduleName := "circe")
-    .settings(common)
-
+// lazy val circe =
+//   project
+//     .in(file("module-circe"))
+//     .dependsOn(core % "compile->compile;test->test")
+//     .enablePlugins(ScalaNativePlugin, VcpkgNativePlugin, BindgenPlugin)
+//     .settings(
+//       libraryDependencies += "io.circe" %%% "circe-parser" % Versions.circe
+//     )
+//     .settings(moduleName := "circe")
+//     .settings(common)
+//
 val common = Seq(
   organization := "com.indoorvivants.roach",
   scalaVersion := Versions.Scala,
   libraryDependencies += "org.scalameta" %%% "munit" % Versions.munit % Test,
   resolvers ++= Resolver.sonatypeOssRepos("snapshots"),
-  vcpkgDependencies := Set("libpq")
+  vcpkgDependencies := VcpkgDependencies("libpq")
 )
 
 lazy val docs =
@@ -89,7 +87,7 @@ lazy val docs =
     .in(file("target/.docs-target"))
     .enablePlugins(MdocPlugin)
     .settings(scalaVersion := Versions.Scala)
-    .dependsOn(core, circe, upickle)
+    .dependsOn(core, /*circe,*/ upickle)
     .settings(
       publish / skip := true,
       Compile / resourceGenerators += Def.task {
