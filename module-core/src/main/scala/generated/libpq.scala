@@ -238,9 +238,9 @@ object enumerations:
 
 object aliases:
   import _root_.libpq.enumerations.*
+  import _root_.libpq.predef.*
   import _root_.libpq.aliases.*
   import _root_.libpq.structs.*
-
   type FILE = libc.stdio.FILE
   object FILE: 
     val _tag: Tag[FILE] = summon[Tag[libc.stdio.FILE]]
@@ -264,9 +264,11 @@ object aliases:
   opaque type PQnoticeProcessor = CFuncPtr2[Ptr[Byte], CString, Unit]
   object PQnoticeProcessor: 
     given _tag: Tag[PQnoticeProcessor] = Tag.materializeCFuncPtr2[Ptr[Byte], CString, Unit]
+    inline def fromPtr(ptr: Ptr[Byte] | CVoidPtr): PQnoticeProcessor = CFuncPtr.fromPtr(ptr.asInstanceOf[Ptr[Byte]])
     inline def apply(inline o: CFuncPtr2[Ptr[Byte], CString, Unit]): PQnoticeProcessor = o
     extension (v: PQnoticeProcessor)
       inline def value: CFuncPtr2[Ptr[Byte], CString, Unit] = v
+      inline def toPtr: CVoidPtr = CFuncPtr.toPtr(v)
 
   /**
    * [bindgen] header: /Users/velvetbaldmime/Library/Caches/sbt-vcpkg/vcpkg/packages/libpq_arm64-osx/include/libpq-fe.h
@@ -274,9 +276,11 @@ object aliases:
   opaque type PQnoticeReceiver = CFuncPtr2[Ptr[Byte], Ptr[PGresult], Unit]
   object PQnoticeReceiver: 
     given _tag: Tag[PQnoticeReceiver] = Tag.materializeCFuncPtr2[Ptr[Byte], Ptr[PGresult], Unit]
+    inline def fromPtr(ptr: Ptr[Byte] | CVoidPtr): PQnoticeReceiver = CFuncPtr.fromPtr(ptr.asInstanceOf[Ptr[Byte]])
     inline def apply(inline o: CFuncPtr2[Ptr[Byte], Ptr[PGresult], Unit]): PQnoticeReceiver = o
     extension (v: PQnoticeReceiver)
       inline def value: CFuncPtr2[Ptr[Byte], Ptr[PGresult], Unit] = v
+      inline def toPtr: CVoidPtr = CFuncPtr.toPtr(v)
 
   /**
    * [bindgen] header: /Users/velvetbaldmime/Library/Caches/sbt-vcpkg/vcpkg/packages/libpq_arm64-osx/include/libpq-fe.h
@@ -284,16 +288,18 @@ object aliases:
   opaque type PQsslKeyPassHook_OpenSSL_type = CFuncPtr3[CString, CInt, Ptr[PGconn], CInt]
   object PQsslKeyPassHook_OpenSSL_type: 
     given _tag: Tag[PQsslKeyPassHook_OpenSSL_type] = Tag.materializeCFuncPtr3[CString, CInt, Ptr[PGconn], CInt]
+    inline def fromPtr(ptr: Ptr[Byte] | CVoidPtr): PQsslKeyPassHook_OpenSSL_type = CFuncPtr.fromPtr(ptr.asInstanceOf[Ptr[Byte]])
     inline def apply(inline o: CFuncPtr3[CString, CInt, Ptr[PGconn], CInt]): PQsslKeyPassHook_OpenSSL_type = o
     extension (v: PQsslKeyPassHook_OpenSSL_type)
       inline def value: CFuncPtr3[CString, CInt, Ptr[PGconn], CInt] = v
+      inline def toPtr: CVoidPtr = CFuncPtr.toPtr(v)
 
   /**
    * [bindgen] header: /Users/velvetbaldmime/Library/Caches/sbt-vcpkg/vcpkg/packages/libpq_arm64-osx/include/postgres_ext.h
   */
   opaque type pg_int64 = CLongInt
   object pg_int64: 
-    given _tag: Tag[pg_int64] = Tag.Long
+    given _tag: Tag[pg_int64] = Tag.Size
     inline def apply(inline o: CLongInt): pg_int64 = o
     extension (v: pg_int64)
       inline def value: CLongInt = v
@@ -304,9 +310,11 @@ object aliases:
   opaque type pgthreadlock_t = CFuncPtr1[CInt, Unit]
   object pgthreadlock_t: 
     given _tag: Tag[pgthreadlock_t] = Tag.materializeCFuncPtr1[CInt, Unit]
+    inline def fromPtr(ptr: Ptr[Byte] | CVoidPtr): pgthreadlock_t = CFuncPtr.fromPtr(ptr.asInstanceOf[Ptr[Byte]])
     inline def apply(inline o: CFuncPtr1[CInt, Unit]): pgthreadlock_t = o
     extension (v: pgthreadlock_t)
       inline def value: CFuncPtr1[CInt, Unit] = v
+      inline def toPtr: CVoidPtr = CFuncPtr.toPtr(v)
 
   /**
    * [bindgen] header: /Users/velvetbaldmime/Library/Caches/sbt-vcpkg/vcpkg/packages/libpq_arm64-osx/include/libpq-fe.h
@@ -327,9 +335,9 @@ object aliases:
 
 object structs:
   import _root_.libpq.enumerations.*
+  import _root_.libpq.predef.*
   import _root_.libpq.aliases.*
   import _root_.libpq.structs.*
-
   /**
    * [bindgen] header: /Users/velvetbaldmime/Library/Caches/sbt-vcpkg/vcpkg/packages/libpq_arm64-osx/include/libpq-fe.h
   */
@@ -687,9 +695,9 @@ object structs:
 @extern
 private[libpq] object extern_functions:
   import _root_.libpq.enumerations.*
+  import _root_.libpq.predef.*
   import _root_.libpq.aliases.*
   import _root_.libpq.structs.*
-
   /**
    * [bindgen] header: /Users/velvetbaldmime/Library/Caches/sbt-vcpkg/vcpkg/packages/libpq_arm64-osx/include/libpq-fe.h
   */
@@ -1513,9 +1521,9 @@ private[libpq] object extern_functions:
 
 object functions:
   import _root_.libpq.enumerations.*
+  import _root_.libpq.predef.*
   import _root_.libpq.aliases.*
   import _root_.libpq.structs.*
-
   import extern_functions.*
   export extern_functions.*
 

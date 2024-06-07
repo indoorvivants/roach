@@ -5,7 +5,7 @@ import scalanative.unsafe.Zone
 object Migrate:
   def all(pool: Pool, tableName: String = defaultTableName)(
       files: ResourceFile*
-  ): MigrationResult = Zone { implicit z =>
+  ): MigrationResult = Zone: 
     pool.withLease(createTable(tableName))
 
     var rollback = false
@@ -68,7 +68,6 @@ object Migrate:
     }
 
     MigrationResult(applied.result(), present.result())
-  }
 
   case class MigrationResult(applied: Vector[String], present: Vector[String])
 

@@ -55,9 +55,9 @@ private[roach] class Single private (
           conn,
           PQnoticeProcessor { (arg: Ptr[Byte], msg: CString) =>
             val handler = arg.asInstanceOf[Ptr[String => Unit]]
-            Zone { implicit z =>
+            Zone(
               (!handler).apply(fromCString(msg))
-            }
+            )
           },
           captured.asInstanceOf[Ptr[Byte]]
         )
