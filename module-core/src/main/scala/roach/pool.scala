@@ -65,8 +65,16 @@ private[roach] class Single private (
 
       db
     }
+  end reconnect
 
   def lease[A](f: Database => A): A =
+    if scalanative.meta.LinktimeInfo.isMultithreadingEnabled then
+      slot.synchronized:
+        singleThreadedLogic(f) // YOLO
+    else singleThreadedLogic(f)
+  end lease
+
+  private inline def singleThreadedLogic[A](f: Database => A) =
     slot match
       case Slot.Available(db) =>
         var result: A | Null = null
@@ -97,7 +105,7 @@ private[roach] class Single private (
           )
           .raise
     end match
-  end lease
+  end singleThreadedLogic
 
 end Single
 

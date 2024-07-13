@@ -64,6 +64,7 @@ lazy val upickle =
     )
     .settings(moduleName := "upickle")
     .settings(common)
+    .settings(configurePlatform)
 
 lazy val circe =
   project
@@ -75,6 +76,7 @@ lazy val circe =
     )
     .settings(moduleName := "circe")
     .settings(common)
+    .settings(configurePlatform)
 
 val common = Seq(
   organization := "com.indoorvivants.roach",
@@ -147,5 +149,6 @@ val configurePlatform = Seq(
         conf.compileOptions ++ arch64
       )
       .withIncrementalCompilation(true)
+      .withMultithreading(true)
   }
 )
