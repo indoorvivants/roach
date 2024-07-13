@@ -10,6 +10,7 @@ import scala.util.Try.apply
 import scala.util.Try
 import java.util.UUID
 import scala.util.Random
+import scala.concurrent.*, duration.*
 
 class BasicTests extends munit.FunSuite, TestHarness:
   override protected def tableCreationSQL: Option[String => String] =
@@ -332,5 +333,34 @@ class BasicTests extends munit.FunSuite, TestHarness:
         )
       }
     }
+  }
+
+  test("parallelism") {
+
+    def read(limit: Int)(using Database, Zone): Vector[(String, Boolean)] =
+      sql"select typname, typisdefined from pg_type limit $int4"
+        .all(limit, name ~ bool)
+    end read
+
+    val builder = List.newBuilder[(String, Boolean)]
+
+    val parallelism = 500
+    val limit = 100
+
+    Zone:
+      import concurrent.ExecutionContext.Implicits.global
+      val futures = Pool.single(connectionString): pool =>
+        List
+          .fill(parallelism):
+            Future:
+              // lease a connection
+              pool.withLease:
+                read(limit).foreach: (name, b) =>
+                  builder.synchronized:
+                    builder += name -> b
+      Await.ready(Future.sequence(futures), Duration.Inf)
+
+    assert(builder.result().size == parallelism * limit)
+    assert(builder.result().distinct.size == limit)
   }
 end BasicTests
