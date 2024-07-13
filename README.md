@@ -54,7 +54,7 @@ $ docker run -p 5432:5432 -e POSTGRES_PASSWORD=mysecretpassword -d postgres
 
 ```scala mdoc:compile-only
 //> using platform "scala-native"
-//> using lib "com.indoorvivants.roach::core::0.0.6"
+//> using lib "com.indoorvivants.roach::core::0.1.0"
 
 import roach.*
 import scala.util.Using
@@ -151,8 +151,8 @@ def fragments_example(using Database, Zone) =
 
 ### Simple JSON module (with Circe and upickle)
 
-- **Circe**: Available at `com.indoorvivants.roach::circe::0.0.6` maven coordinates.
-- **Upickle**: Available at `com.indoorvivants.roach::upickle::0.0.6` maven coordinates.
+- **Circe**: Available at `com.indoorvivants.roach::circe::0.1.0` maven coordinates.
+- **Upickle**: Available at `com.indoorvivants.roach::upickle::0.1.0` maven coordinates.
 
 ```scala mdoc:compile-only
 import roach.{upickle => _, circe => _, *}
