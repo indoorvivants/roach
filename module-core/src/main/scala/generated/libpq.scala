@@ -16,9 +16,6 @@ object predef:
 
 object enumerations:
   import predef.*
-  /**
-   * [bindgen] header: /Users/velvetbaldmime/Library/Caches/sbt-vcpkg/vcpkg/packages/libpq_arm64-osx/include/libpq-fe.h
-  */
   opaque type ConnStatusType = CUnsignedInt
   object ConnStatusType extends CEnumU[ConnStatusType]:
     given _tag: Tag[ConnStatusType] = Tag.UInt
@@ -53,15 +50,12 @@ object enumerations:
         case CONNECTION_GSS_STARTUP => Some("CONNECTION_GSS_STARTUP")
         case CONNECTION_CHECK_TARGET => Some("CONNECTION_CHECK_TARGET")
         case CONNECTION_CHECK_STANDBY => Some("CONNECTION_CHECK_STANDBY")
-        case _ => None
+        case _ => _root_.scala.None
     extension (a: ConnStatusType)
       inline def &(b: ConnStatusType): ConnStatusType = a & b
       inline def |(b: ConnStatusType): ConnStatusType = a | b
       inline def is(b: ConnStatusType): Boolean = (a & b) == b
 
-  /**
-   * [bindgen] header: /Users/velvetbaldmime/Library/Caches/sbt-vcpkg/vcpkg/packages/libpq_arm64-osx/include/libpq-fe.h
-  */
   opaque type ExecStatusType = CUnsignedInt
   object ExecStatusType extends CEnumU[ExecStatusType]:
     given _tag: Tag[ExecStatusType] = Tag.UInt
@@ -92,15 +86,12 @@ object enumerations:
         case PGRES_SINGLE_TUPLE => Some("PGRES_SINGLE_TUPLE")
         case PGRES_PIPELINE_SYNC => Some("PGRES_PIPELINE_SYNC")
         case PGRES_PIPELINE_ABORTED => Some("PGRES_PIPELINE_ABORTED")
-        case _ => None
+        case _ => _root_.scala.None
     extension (a: ExecStatusType)
       inline def &(b: ExecStatusType): ExecStatusType = a & b
       inline def |(b: ExecStatusType): ExecStatusType = a | b
       inline def is(b: ExecStatusType): Boolean = (a & b) == b
 
-  /**
-   * [bindgen] header: /Users/velvetbaldmime/Library/Caches/sbt-vcpkg/vcpkg/packages/libpq_arm64-osx/include/libpq-fe.h
-  */
   opaque type PGContextVisibility = CUnsignedInt
   object PGContextVisibility extends CEnumU[PGContextVisibility]:
     given _tag: Tag[PGContextVisibility] = Tag.UInt
@@ -113,15 +104,12 @@ object enumerations:
         case PQSHOW_CONTEXT_NEVER => Some("PQSHOW_CONTEXT_NEVER")
         case PQSHOW_CONTEXT_ERRORS => Some("PQSHOW_CONTEXT_ERRORS")
         case PQSHOW_CONTEXT_ALWAYS => Some("PQSHOW_CONTEXT_ALWAYS")
-        case _ => None
+        case _ => _root_.scala.None
     extension (a: PGContextVisibility)
       inline def &(b: PGContextVisibility): PGContextVisibility = a & b
       inline def |(b: PGContextVisibility): PGContextVisibility = a | b
       inline def is(b: PGContextVisibility): Boolean = (a & b) == b
 
-  /**
-   * [bindgen] header: /Users/velvetbaldmime/Library/Caches/sbt-vcpkg/vcpkg/packages/libpq_arm64-osx/include/libpq-fe.h
-  */
   opaque type PGPing = CUnsignedInt
   object PGPing extends CEnumU[PGPing]:
     given _tag: Tag[PGPing] = Tag.UInt
@@ -136,15 +124,12 @@ object enumerations:
         case PQPING_REJECT => Some("PQPING_REJECT")
         case PQPING_NO_RESPONSE => Some("PQPING_NO_RESPONSE")
         case PQPING_NO_ATTEMPT => Some("PQPING_NO_ATTEMPT")
-        case _ => None
+        case _ => _root_.scala.None
     extension (a: PGPing)
       inline def &(b: PGPing): PGPing = a & b
       inline def |(b: PGPing): PGPing = a | b
       inline def is(b: PGPing): Boolean = (a & b) == b
 
-  /**
-   * [bindgen] header: /Users/velvetbaldmime/Library/Caches/sbt-vcpkg/vcpkg/packages/libpq_arm64-osx/include/libpq-fe.h
-  */
   opaque type PGTransactionStatusType = CUnsignedInt
   object PGTransactionStatusType extends CEnumU[PGTransactionStatusType]:
     given _tag: Tag[PGTransactionStatusType] = Tag.UInt
@@ -161,15 +146,12 @@ object enumerations:
         case PQTRANS_INTRANS => Some("PQTRANS_INTRANS")
         case PQTRANS_INERROR => Some("PQTRANS_INERROR")
         case PQTRANS_UNKNOWN => Some("PQTRANS_UNKNOWN")
-        case _ => None
+        case _ => _root_.scala.None
     extension (a: PGTransactionStatusType)
       inline def &(b: PGTransactionStatusType): PGTransactionStatusType = a & b
       inline def |(b: PGTransactionStatusType): PGTransactionStatusType = a | b
       inline def is(b: PGTransactionStatusType): Boolean = (a & b) == b
 
-  /**
-   * [bindgen] header: /Users/velvetbaldmime/Library/Caches/sbt-vcpkg/vcpkg/packages/libpq_arm64-osx/include/libpq-fe.h
-  */
   opaque type PGVerbosity = CUnsignedInt
   object PGVerbosity extends CEnumU[PGVerbosity]:
     given _tag: Tag[PGVerbosity] = Tag.UInt
@@ -184,15 +166,12 @@ object enumerations:
         case PQERRORS_DEFAULT => Some("PQERRORS_DEFAULT")
         case PQERRORS_VERBOSE => Some("PQERRORS_VERBOSE")
         case PQERRORS_SQLSTATE => Some("PQERRORS_SQLSTATE")
-        case _ => None
+        case _ => _root_.scala.None
     extension (a: PGVerbosity)
       inline def &(b: PGVerbosity): PGVerbosity = a & b
       inline def |(b: PGVerbosity): PGVerbosity = a | b
       inline def is(b: PGVerbosity): Boolean = (a & b) == b
 
-  /**
-   * [bindgen] header: /Users/velvetbaldmime/Library/Caches/sbt-vcpkg/vcpkg/packages/libpq_arm64-osx/include/libpq-fe.h
-  */
   opaque type PGpipelineStatus = CUnsignedInt
   object PGpipelineStatus extends CEnumU[PGpipelineStatus]:
     given _tag: Tag[PGpipelineStatus] = Tag.UInt
@@ -205,15 +184,12 @@ object enumerations:
         case PQ_PIPELINE_OFF => Some("PQ_PIPELINE_OFF")
         case PQ_PIPELINE_ON => Some("PQ_PIPELINE_ON")
         case PQ_PIPELINE_ABORTED => Some("PQ_PIPELINE_ABORTED")
-        case _ => None
+        case _ => _root_.scala.None
     extension (a: PGpipelineStatus)
       inline def &(b: PGpipelineStatus): PGpipelineStatus = a & b
       inline def |(b: PGpipelineStatus): PGpipelineStatus = a | b
       inline def is(b: PGpipelineStatus): Boolean = (a & b) == b
 
-  /**
-   * [bindgen] header: /Users/velvetbaldmime/Library/Caches/sbt-vcpkg/vcpkg/packages/libpq_arm64-osx/include/libpq-fe.h
-  */
   opaque type PostgresPollingStatusType = CUnsignedInt
   object PostgresPollingStatusType extends CEnumU[PostgresPollingStatusType]:
     given _tag: Tag[PostgresPollingStatusType] = Tag.UInt
@@ -230,7 +206,7 @@ object enumerations:
         case PGRES_POLLING_WRITING => Some("PGRES_POLLING_WRITING")
         case PGRES_POLLING_OK => Some("PGRES_POLLING_OK")
         case PGRES_POLLING_ACTIVE => Some("PGRES_POLLING_ACTIVE")
-        case _ => None
+        case _ => _root_.scala.None
     extension (a: PostgresPollingStatusType)
       inline def &(b: PostgresPollingStatusType): PostgresPollingStatusType = a & b
       inline def |(b: PostgresPollingStatusType): PostgresPollingStatusType = a | b
@@ -238,9 +214,9 @@ object enumerations:
 
 object aliases:
   import _root_.libpq.enumerations.*
+  import _root_.libpq.predef.*
   import _root_.libpq.aliases.*
   import _root_.libpq.structs.*
-
   type FILE = libc.stdio.FILE
   object FILE: 
     val _tag: Tag[FILE] = summon[Tag[libc.stdio.FILE]]
@@ -248,9 +224,6 @@ object aliases:
     extension (v: FILE)
       inline def value: libc.stdio.FILE = v
 
-  /**
-   * [bindgen] header: /Users/velvetbaldmime/Library/Caches/sbt-vcpkg/vcpkg/packages/libpq_arm64-osx/include/postgres_ext.h
-  */
   opaque type Oid = CUnsignedInt
   object Oid: 
     given _tag: Tag[Oid] = Tag.UInt
@@ -258,59 +231,49 @@ object aliases:
     extension (v: Oid)
       inline def value: CUnsignedInt = v
 
-  /**
-   * [bindgen] header: /Users/velvetbaldmime/Library/Caches/sbt-vcpkg/vcpkg/packages/libpq_arm64-osx/include/libpq-fe.h
-  */
   opaque type PQnoticeProcessor = CFuncPtr2[Ptr[Byte], CString, Unit]
   object PQnoticeProcessor: 
     given _tag: Tag[PQnoticeProcessor] = Tag.materializeCFuncPtr2[Ptr[Byte], CString, Unit]
+    inline def fromPtr(ptr: Ptr[Byte] | CVoidPtr): PQnoticeProcessor = CFuncPtr.fromPtr(ptr.asInstanceOf[Ptr[Byte]])
     inline def apply(inline o: CFuncPtr2[Ptr[Byte], CString, Unit]): PQnoticeProcessor = o
     extension (v: PQnoticeProcessor)
       inline def value: CFuncPtr2[Ptr[Byte], CString, Unit] = v
+      inline def toPtr: CVoidPtr = CFuncPtr.toPtr(v)
 
-  /**
-   * [bindgen] header: /Users/velvetbaldmime/Library/Caches/sbt-vcpkg/vcpkg/packages/libpq_arm64-osx/include/libpq-fe.h
-  */
   opaque type PQnoticeReceiver = CFuncPtr2[Ptr[Byte], Ptr[PGresult], Unit]
   object PQnoticeReceiver: 
     given _tag: Tag[PQnoticeReceiver] = Tag.materializeCFuncPtr2[Ptr[Byte], Ptr[PGresult], Unit]
+    inline def fromPtr(ptr: Ptr[Byte] | CVoidPtr): PQnoticeReceiver = CFuncPtr.fromPtr(ptr.asInstanceOf[Ptr[Byte]])
     inline def apply(inline o: CFuncPtr2[Ptr[Byte], Ptr[PGresult], Unit]): PQnoticeReceiver = o
     extension (v: PQnoticeReceiver)
       inline def value: CFuncPtr2[Ptr[Byte], Ptr[PGresult], Unit] = v
+      inline def toPtr: CVoidPtr = CFuncPtr.toPtr(v)
 
-  /**
-   * [bindgen] header: /Users/velvetbaldmime/Library/Caches/sbt-vcpkg/vcpkg/packages/libpq_arm64-osx/include/libpq-fe.h
-  */
   opaque type PQsslKeyPassHook_OpenSSL_type = CFuncPtr3[CString, CInt, Ptr[PGconn], CInt]
   object PQsslKeyPassHook_OpenSSL_type: 
     given _tag: Tag[PQsslKeyPassHook_OpenSSL_type] = Tag.materializeCFuncPtr3[CString, CInt, Ptr[PGconn], CInt]
+    inline def fromPtr(ptr: Ptr[Byte] | CVoidPtr): PQsslKeyPassHook_OpenSSL_type = CFuncPtr.fromPtr(ptr.asInstanceOf[Ptr[Byte]])
     inline def apply(inline o: CFuncPtr3[CString, CInt, Ptr[PGconn], CInt]): PQsslKeyPassHook_OpenSSL_type = o
     extension (v: PQsslKeyPassHook_OpenSSL_type)
       inline def value: CFuncPtr3[CString, CInt, Ptr[PGconn], CInt] = v
+      inline def toPtr: CVoidPtr = CFuncPtr.toPtr(v)
 
-  /**
-   * [bindgen] header: /Users/velvetbaldmime/Library/Caches/sbt-vcpkg/vcpkg/packages/libpq_arm64-osx/include/postgres_ext.h
-  */
   opaque type pg_int64 = CLongInt
   object pg_int64: 
-    given _tag: Tag[pg_int64] = Tag.Long
+    given _tag: Tag[pg_int64] = Tag.Size
     inline def apply(inline o: CLongInt): pg_int64 = o
     extension (v: pg_int64)
       inline def value: CLongInt = v
 
-  /**
-   * [bindgen] header: /Users/velvetbaldmime/Library/Caches/sbt-vcpkg/vcpkg/packages/libpq_arm64-osx/include/libpq-fe.h
-  */
   opaque type pgthreadlock_t = CFuncPtr1[CInt, Unit]
   object pgthreadlock_t: 
     given _tag: Tag[pgthreadlock_t] = Tag.materializeCFuncPtr1[CInt, Unit]
+    inline def fromPtr(ptr: Ptr[Byte] | CVoidPtr): pgthreadlock_t = CFuncPtr.fromPtr(ptr.asInstanceOf[Ptr[Byte]])
     inline def apply(inline o: CFuncPtr1[CInt, Unit]): pgthreadlock_t = o
     extension (v: pgthreadlock_t)
       inline def value: CFuncPtr1[CInt, Unit] = v
+      inline def toPtr: CVoidPtr = CFuncPtr.toPtr(v)
 
-  /**
-   * [bindgen] header: /Users/velvetbaldmime/Library/Caches/sbt-vcpkg/vcpkg/packages/libpq_arm64-osx/include/libpq-fe.h
-  */
   opaque type pqbool = CChar
   object pqbool: 
     given _tag: Tag[pqbool] = Tag.Byte
@@ -327,26 +290,17 @@ object aliases:
 
 object structs:
   import _root_.libpq.enumerations.*
+  import _root_.libpq.predef.*
   import _root_.libpq.aliases.*
   import _root_.libpq.structs.*
-
-  /**
-   * [bindgen] header: /Users/velvetbaldmime/Library/Caches/sbt-vcpkg/vcpkg/packages/libpq_arm64-osx/include/libpq-fe.h
-  */
   opaque type PGcancel = CStruct0
   object PGcancel:
     given _tag: Tag[PGcancel] = Tag.materializeCStruct0Tag
 
-  /**
-   * [bindgen] header: /Users/velvetbaldmime/Library/Caches/sbt-vcpkg/vcpkg/packages/libpq_arm64-osx/include/libpq-fe.h
-  */
   opaque type PGconn = CStruct0
   object PGconn:
     given _tag: Tag[PGconn] = Tag.materializeCStruct0Tag
 
-  /**
-   * [bindgen] header: /Users/velvetbaldmime/Library/Caches/sbt-vcpkg/vcpkg/packages/libpq_arm64-osx/include/libpq-fe.h
-  */
   opaque type PGnotify = CStruct4[CString, CInt, CString, Ptr[Byte]]
   object PGnotify:
     given _tag: Tag[PGnotify] = Tag.materializeCStruct4Tag[CString, CInt, CString, Ptr[Byte]]
@@ -368,9 +322,6 @@ object structs:
       def next : Ptr[pgNotify] = struct._4.asInstanceOf[Ptr[pgNotify]]
       def next_=(value: Ptr[pgNotify]): Unit = !struct.at4 = value.asInstanceOf[Ptr[Byte]]
 
-  /**
-   * [bindgen] header: /Users/velvetbaldmime/Library/Caches/sbt-vcpkg/vcpkg/packages/libpq_arm64-osx/include/libpq-fe.h
-  */
   opaque type PGresAttDesc = CStruct7[CString, Oid, CInt, CInt, Oid, CInt, CInt]
   object PGresAttDesc:
     given _tag: Tag[PGresAttDesc] = Tag.materializeCStruct7Tag[CString, Oid, CInt, CInt, Oid, CInt, CInt]
@@ -401,21 +352,12 @@ object structs:
       def atttypmod : CInt = struct._7
       def atttypmod_=(value: CInt): Unit = !struct.at7 = value
 
-  /**
-   * [bindgen] header: /Users/velvetbaldmime/Library/Caches/sbt-vcpkg/vcpkg/packages/libpq_arm64-osx/include/libpq-fe.h
-  */
   opaque type PGresult = CStruct0
   object PGresult:
     given _tag: Tag[PGresult] = Tag.materializeCStruct0Tag
 
-  /**
-   * [bindgen] header: /Users/velvetbaldmime/Library/Caches/sbt-vcpkg/vcpkg/packages/libpq_arm64-osx/include/libpq-fe.h
-  */
   opaque type PQArgBlock = CStruct3[CInt, CInt, PQArgBlock.Union0]
   object PQArgBlock:
-    /**
-     * [bindgen] header: /Users/velvetbaldmime/Library/Caches/sbt-vcpkg/vcpkg/packages/libpq_arm64-osx/include/libpq-fe.h
-    */
     opaque type Union0 = CArray[Byte, Nat._8]
     object Union0:
       given _tag: Tag[Union0] = Tag.CArray[CChar, Nat._8](Tag.Byte, Tag.Nat8)
@@ -455,9 +397,6 @@ object structs:
       def u : PQArgBlock.Union0 = struct._3
       def u_=(value: PQArgBlock.Union0): Unit = !struct.at3 = value
 
-  /**
-   * [bindgen] header: /Users/velvetbaldmime/Library/Caches/sbt-vcpkg/vcpkg/packages/libpq_arm64-osx/include/libpq-fe.h
-  */
   opaque type PQconninfoOption = CStruct7[CString, CString, CString, CString, CString, CString, CInt]
   object PQconninfoOption:
     given _tag: Tag[PQconninfoOption] = Tag.materializeCStruct7Tag[CString, CString, CString, CString, CString, CString, CInt]
@@ -488,9 +427,6 @@ object structs:
       def dispsize : CInt = struct._7
       def dispsize_=(value: CInt): Unit = !struct.at7 = value
 
-  /**
-   * [bindgen] header: /Users/velvetbaldmime/Library/Caches/sbt-vcpkg/vcpkg/packages/libpq_arm64-osx/include/libpq-fe.h
-  */
   opaque type PQprintOpt = CStruct10[pqbool, pqbool, pqbool, pqbool, pqbool, pqbool, CString, CString, CString, Ptr[CString]]
   object PQprintOpt:
     given _tag: Tag[PQprintOpt] = Tag.materializeCStruct10Tag[pqbool, pqbool, pqbool, pqbool, pqbool, pqbool, CString, CString, CString, Ptr[CString]]
@@ -530,9 +466,6 @@ object structs:
       def fieldName : Ptr[CString] = struct._10
       def fieldName_=(value: Ptr[CString]): Unit = !struct.at10 = value
 
-  /**
-   * [bindgen] header: /Users/velvetbaldmime/Library/Caches/sbt-vcpkg/vcpkg/packages/libpq_arm64-osx/include/libpq-fe.h
-  */
   opaque type _PQconninfoOption = CStruct7[CString, CString, CString, CString, CString, CString, CInt]
   object _PQconninfoOption:
     given _tag: Tag[_PQconninfoOption] = Tag.materializeCStruct7Tag[CString, CString, CString, CString, CString, CString, CInt]
@@ -563,9 +496,6 @@ object structs:
       def dispsize : CInt = struct._7
       def dispsize_=(value: CInt): Unit = !struct.at7 = value
 
-  /**
-   * [bindgen] header: /Users/velvetbaldmime/Library/Caches/sbt-vcpkg/vcpkg/packages/libpq_arm64-osx/include/libpq-fe.h
-  */
   opaque type _PQprintOpt = CStruct10[pqbool, pqbool, pqbool, pqbool, pqbool, pqbool, CString, CString, CString, Ptr[CString]]
   object _PQprintOpt:
     given _tag: Tag[_PQprintOpt] = Tag.materializeCStruct10Tag[pqbool, pqbool, pqbool, pqbool, pqbool, pqbool, CString, CString, CString, Ptr[CString]]
@@ -605,9 +535,6 @@ object structs:
       def fieldName : Ptr[CString] = struct._10
       def fieldName_=(value: Ptr[CString]): Unit = !struct.at10 = value
 
-  /**
-   * [bindgen] header: /Users/velvetbaldmime/Library/Caches/sbt-vcpkg/vcpkg/packages/libpq_arm64-osx/include/libpq-fe.h
-  */
   opaque type pgNotify = CStruct4[CString, CInt, CString, Ptr[Byte]]
   object pgNotify:
     given _tag: Tag[pgNotify] = Tag.materializeCStruct4Tag[CString, CInt, CString, Ptr[Byte]]
@@ -629,30 +556,18 @@ object structs:
       def next : Ptr[pgNotify] = struct._4.asInstanceOf[Ptr[pgNotify]]
       def next_=(value: Ptr[pgNotify]): Unit = !struct.at4 = value.asInstanceOf[Ptr[Byte]]
 
-  /**
-   * [bindgen] header: /Users/velvetbaldmime/Library/Caches/sbt-vcpkg/vcpkg/packages/libpq_arm64-osx/include/libpq-fe.h
-  */
   opaque type pg_cancel = CStruct0
   object pg_cancel:
     given _tag: Tag[pg_cancel] = Tag.materializeCStruct0Tag
 
-  /**
-   * [bindgen] header: /Users/velvetbaldmime/Library/Caches/sbt-vcpkg/vcpkg/packages/libpq_arm64-osx/include/libpq-fe.h
-  */
   opaque type pg_conn = CStruct0
   object pg_conn:
     given _tag: Tag[pg_conn] = Tag.materializeCStruct0Tag
 
-  /**
-   * [bindgen] header: /Users/velvetbaldmime/Library/Caches/sbt-vcpkg/vcpkg/packages/libpq_arm64-osx/include/libpq-fe.h
-  */
   opaque type pg_result = CStruct0
   object pg_result:
     given _tag: Tag[pg_result] = Tag.materializeCStruct0Tag
 
-  /**
-   * [bindgen] header: /Users/velvetbaldmime/Library/Caches/sbt-vcpkg/vcpkg/packages/libpq_arm64-osx/include/libpq-fe.h
-  */
   opaque type pgresAttDesc = CStruct7[CString, Oid, CInt, CInt, Oid, CInt, CInt]
   object pgresAttDesc:
     given _tag: Tag[pgresAttDesc] = Tag.materializeCStruct7Tag[CString, Oid, CInt, CInt, Oid, CInt, CInt]
@@ -687,835 +602,343 @@ object structs:
 @extern
 private[libpq] object extern_functions:
   import _root_.libpq.enumerations.*
+  import _root_.libpq.predef.*
   import _root_.libpq.aliases.*
   import _root_.libpq.structs.*
-
-  /**
-   * [bindgen] header: /Users/velvetbaldmime/Library/Caches/sbt-vcpkg/vcpkg/packages/libpq_arm64-osx/include/libpq-fe.h
-  */
   def PQbackendPID(conn : Ptr[PGconn]): CInt = extern
 
-  /**
-   * [bindgen] header: /Users/velvetbaldmime/Library/Caches/sbt-vcpkg/vcpkg/packages/libpq_arm64-osx/include/libpq-fe.h
-  */
   def PQbinaryTuples(res : Ptr[PGresult]): CInt = extern
 
-  /**
-   * [bindgen] header: /Users/velvetbaldmime/Library/Caches/sbt-vcpkg/vcpkg/packages/libpq_arm64-osx/include/libpq-fe.h
-  */
   def PQcancel(cancel : Ptr[PGcancel], errbuf : CString, errbufsize : CInt): CInt = extern
 
-  /**
-   * [bindgen] header: /Users/velvetbaldmime/Library/Caches/sbt-vcpkg/vcpkg/packages/libpq_arm64-osx/include/libpq-fe.h
-  */
   def PQclear(res : Ptr[PGresult]): Unit = extern
 
-  /**
-   * [bindgen] header: /Users/velvetbaldmime/Library/Caches/sbt-vcpkg/vcpkg/packages/libpq_arm64-osx/include/libpq-fe.h
-  */
   def PQclientEncoding(conn : Ptr[PGconn]): CInt = extern
 
-  /**
-   * [bindgen] header: /Users/velvetbaldmime/Library/Caches/sbt-vcpkg/vcpkg/packages/libpq_arm64-osx/include/libpq-fe.h
-  */
   def PQcmdStatus(res : Ptr[PGresult]): CString = extern
 
-  /**
-   * [bindgen] header: /Users/velvetbaldmime/Library/Caches/sbt-vcpkg/vcpkg/packages/libpq_arm64-osx/include/libpq-fe.h
-  */
   def PQcmdTuples(res : Ptr[PGresult]): CString = extern
 
-  /**
-   * [bindgen] header: /Users/velvetbaldmime/Library/Caches/sbt-vcpkg/vcpkg/packages/libpq_arm64-osx/include/libpq-fe.h
-  */
   def PQconndefaults(): Ptr[PQconninfoOption] = extern
 
-  /**
-   * [bindgen] header: /Users/velvetbaldmime/Library/Caches/sbt-vcpkg/vcpkg/packages/libpq_arm64-osx/include/libpq-fe.h
-  */
   def PQconnectPoll(conn : Ptr[PGconn]): PostgresPollingStatusType = extern
 
-  /**
-   * [bindgen] header: /Users/velvetbaldmime/Library/Caches/sbt-vcpkg/vcpkg/packages/libpq_arm64-osx/include/libpq-fe.h
-  */
   def PQconnectStart(conninfo : CString): Ptr[PGconn] = extern
 
-  /**
-   * [bindgen] header: /Users/velvetbaldmime/Library/Caches/sbt-vcpkg/vcpkg/packages/libpq_arm64-osx/include/libpq-fe.h
-  */
   def PQconnectStartParams(keywords : Ptr[CString], values : Ptr[CString], expand_dbname : CInt): Ptr[PGconn] = extern
 
-  /**
-   * [bindgen] header: /Users/velvetbaldmime/Library/Caches/sbt-vcpkg/vcpkg/packages/libpq_arm64-osx/include/libpq-fe.h
-  */
   def PQconnectdb(conninfo : CString): Ptr[PGconn] = extern
 
-  /**
-   * [bindgen] header: /Users/velvetbaldmime/Library/Caches/sbt-vcpkg/vcpkg/packages/libpq_arm64-osx/include/libpq-fe.h
-  */
   def PQconnectdbParams(keywords : Ptr[CString], values : Ptr[CString], expand_dbname : CInt): Ptr[PGconn] = extern
 
-  /**
-   * [bindgen] header: /Users/velvetbaldmime/Library/Caches/sbt-vcpkg/vcpkg/packages/libpq_arm64-osx/include/libpq-fe.h
-  */
   def PQconnectionNeedsPassword(conn : Ptr[PGconn]): CInt = extern
 
-  /**
-   * [bindgen] header: /Users/velvetbaldmime/Library/Caches/sbt-vcpkg/vcpkg/packages/libpq_arm64-osx/include/libpq-fe.h
-  */
   def PQconnectionUsedPassword(conn : Ptr[PGconn]): CInt = extern
 
-  /**
-   * [bindgen] header: /Users/velvetbaldmime/Library/Caches/sbt-vcpkg/vcpkg/packages/libpq_arm64-osx/include/libpq-fe.h
-  */
   def PQconninfo(conn : Ptr[PGconn]): Ptr[PQconninfoOption] = extern
 
-  /**
-   * [bindgen] header: /Users/velvetbaldmime/Library/Caches/sbt-vcpkg/vcpkg/packages/libpq_arm64-osx/include/libpq-fe.h
-  */
   def PQconninfoFree(connOptions : Ptr[PQconninfoOption]): Unit = extern
 
-  /**
-   * [bindgen] header: /Users/velvetbaldmime/Library/Caches/sbt-vcpkg/vcpkg/packages/libpq_arm64-osx/include/libpq-fe.h
-  */
   def PQconninfoParse(conninfo : CString, errmsg : Ptr[CString]): Ptr[PQconninfoOption] = extern
 
-  /**
-   * [bindgen] header: /Users/velvetbaldmime/Library/Caches/sbt-vcpkg/vcpkg/packages/libpq_arm64-osx/include/libpq-fe.h
-  */
   def PQconsumeInput(conn : Ptr[PGconn]): CInt = extern
 
-  /**
-   * [bindgen] header: /Users/velvetbaldmime/Library/Caches/sbt-vcpkg/vcpkg/packages/libpq_arm64-osx/include/libpq-fe.h
-  */
   def PQcopyResult(src : Ptr[PGresult], flags : CInt): Ptr[PGresult] = extern
 
-  /**
-   * [bindgen] header: /Users/velvetbaldmime/Library/Caches/sbt-vcpkg/vcpkg/packages/libpq_arm64-osx/include/libpq-fe.h
-  */
   def PQdb(conn : Ptr[PGconn]): CString = extern
 
-  /**
-   * [bindgen] header: /Users/velvetbaldmime/Library/Caches/sbt-vcpkg/vcpkg/packages/libpq_arm64-osx/include/libpq-fe.h
-  */
   def PQdefaultSSLKeyPassHook_OpenSSL(buf : CString, size : CInt, conn : Ptr[PGconn]): CInt = extern
 
-  /**
-   * [bindgen] header: /Users/velvetbaldmime/Library/Caches/sbt-vcpkg/vcpkg/packages/libpq_arm64-osx/include/libpq-fe.h
-  */
   def PQdescribePortal(conn : Ptr[PGconn], portal : CString): Ptr[PGresult] = extern
 
-  /**
-   * [bindgen] header: /Users/velvetbaldmime/Library/Caches/sbt-vcpkg/vcpkg/packages/libpq_arm64-osx/include/libpq-fe.h
-  */
   def PQdescribePrepared(conn : Ptr[PGconn], stmt : CString): Ptr[PGresult] = extern
 
-  /**
-   * [bindgen] header: /Users/velvetbaldmime/Library/Caches/sbt-vcpkg/vcpkg/packages/libpq_arm64-osx/include/libpq-fe.h
-  */
   def PQdisplayTuples(res : Ptr[PGresult], fp : Ptr[FILE], fillAlign : CInt, fieldSep : CString, printHeader : CInt, quiet : CInt): Unit = extern
 
-  /**
-   * [bindgen] header: /Users/velvetbaldmime/Library/Caches/sbt-vcpkg/vcpkg/packages/libpq_arm64-osx/include/libpq-fe.h
-  */
   def PQdsplen(s : CString, encoding : CInt): CInt = extern
 
-  /**
-   * [bindgen] header: /Users/velvetbaldmime/Library/Caches/sbt-vcpkg/vcpkg/packages/libpq_arm64-osx/include/libpq-fe.h
-  */
   def PQencryptPassword(passwd : CString, user : CString): CString = extern
 
-  /**
-   * [bindgen] header: /Users/velvetbaldmime/Library/Caches/sbt-vcpkg/vcpkg/packages/libpq_arm64-osx/include/libpq-fe.h
-  */
   def PQencryptPasswordConn(conn : Ptr[PGconn], passwd : CString, user : CString, algorithm : CString): CString = extern
 
-  /**
-   * [bindgen] header: /Users/velvetbaldmime/Library/Caches/sbt-vcpkg/vcpkg/packages/libpq_arm64-osx/include/libpq-fe.h
-  */
   def PQendcopy(conn : Ptr[PGconn]): CInt = extern
 
-  /**
-   * [bindgen] header: /Users/velvetbaldmime/Library/Caches/sbt-vcpkg/vcpkg/packages/libpq_arm64-osx/include/libpq-fe.h
-  */
   def PQenterPipelineMode(conn : Ptr[PGconn]): CInt = extern
 
-  /**
-   * [bindgen] header: /Users/velvetbaldmime/Library/Caches/sbt-vcpkg/vcpkg/packages/libpq_arm64-osx/include/libpq-fe.h
-  */
   def PQenv2encoding(): CInt = extern
 
-  /**
-   * [bindgen] header: /Users/velvetbaldmime/Library/Caches/sbt-vcpkg/vcpkg/packages/libpq_arm64-osx/include/libpq-fe.h
-  */
   def PQerrorMessage(conn : Ptr[PGconn]): CString = extern
 
-  /**
-   * [bindgen] header: /Users/velvetbaldmime/Library/Caches/sbt-vcpkg/vcpkg/packages/libpq_arm64-osx/include/libpq-fe.h
-  */
   def PQescapeBytea(from : Ptr[CUnsignedChar], from_length : size_t, to_length : Ptr[size_t]): Ptr[CUnsignedChar] = extern
 
-  /**
-   * [bindgen] header: /Users/velvetbaldmime/Library/Caches/sbt-vcpkg/vcpkg/packages/libpq_arm64-osx/include/libpq-fe.h
-  */
   def PQescapeByteaConn(conn : Ptr[PGconn], from : Ptr[CUnsignedChar], from_length : size_t, to_length : Ptr[size_t]): Ptr[CUnsignedChar] = extern
 
-  /**
-   * [bindgen] header: /Users/velvetbaldmime/Library/Caches/sbt-vcpkg/vcpkg/packages/libpq_arm64-osx/include/libpq-fe.h
-  */
   def PQescapeIdentifier(conn : Ptr[PGconn], str : CString, len : size_t): CString = extern
 
-  /**
-   * [bindgen] header: /Users/velvetbaldmime/Library/Caches/sbt-vcpkg/vcpkg/packages/libpq_arm64-osx/include/libpq-fe.h
-  */
   def PQescapeLiteral(conn : Ptr[PGconn], str : CString, len : size_t): CString = extern
 
-  /**
-   * [bindgen] header: /Users/velvetbaldmime/Library/Caches/sbt-vcpkg/vcpkg/packages/libpq_arm64-osx/include/libpq-fe.h
-  */
   def PQescapeString(to : CString, from : CString, length : size_t): size_t = extern
 
-  /**
-   * [bindgen] header: /Users/velvetbaldmime/Library/Caches/sbt-vcpkg/vcpkg/packages/libpq_arm64-osx/include/libpq-fe.h
-  */
   def PQescapeStringConn(conn : Ptr[PGconn], to : CString, from : CString, length : size_t, error : Ptr[CInt]): size_t = extern
 
-  /**
-   * [bindgen] header: /Users/velvetbaldmime/Library/Caches/sbt-vcpkg/vcpkg/packages/libpq_arm64-osx/include/libpq-fe.h
-  */
   def PQexec(conn : Ptr[PGconn], query : CString): Ptr[PGresult] = extern
 
-  /**
-   * [bindgen] header: /Users/velvetbaldmime/Library/Caches/sbt-vcpkg/vcpkg/packages/libpq_arm64-osx/include/libpq-fe.h
-  */
   def PQexecParams(conn : Ptr[PGconn], command : CString, nParams : CInt, paramTypes : Ptr[Oid], paramValues : Ptr[CString], paramLengths : Ptr[CInt], paramFormats : Ptr[CInt], resultFormat : CInt): Ptr[PGresult] = extern
 
-  /**
-   * [bindgen] header: /Users/velvetbaldmime/Library/Caches/sbt-vcpkg/vcpkg/packages/libpq_arm64-osx/include/libpq-fe.h
-  */
   def PQexecPrepared(conn : Ptr[PGconn], stmtName : CString, nParams : CInt, paramValues : Ptr[CString], paramLengths : Ptr[CInt], paramFormats : Ptr[CInt], resultFormat : CInt): Ptr[PGresult] = extern
 
-  /**
-   * [bindgen] header: /Users/velvetbaldmime/Library/Caches/sbt-vcpkg/vcpkg/packages/libpq_arm64-osx/include/libpq-fe.h
-  */
   def PQexitPipelineMode(conn : Ptr[PGconn]): CInt = extern
 
-  /**
-   * [bindgen] header: /Users/velvetbaldmime/Library/Caches/sbt-vcpkg/vcpkg/packages/libpq_arm64-osx/include/libpq-fe.h
-  */
   def PQfformat(res : Ptr[PGresult], field_num : CInt): CInt = extern
 
-  /**
-   * [bindgen] header: /Users/velvetbaldmime/Library/Caches/sbt-vcpkg/vcpkg/packages/libpq_arm64-osx/include/libpq-fe.h
-  */
   def PQfinish(conn : Ptr[PGconn]): Unit = extern
 
-  /**
-   * [bindgen] header: /Users/velvetbaldmime/Library/Caches/sbt-vcpkg/vcpkg/packages/libpq_arm64-osx/include/libpq-fe.h
-  */
   def PQflush(conn : Ptr[PGconn]): CInt = extern
 
-  /**
-   * [bindgen] header: /Users/velvetbaldmime/Library/Caches/sbt-vcpkg/vcpkg/packages/libpq_arm64-osx/include/libpq-fe.h
-  */
   def PQfmod(res : Ptr[PGresult], field_num : CInt): CInt = extern
 
-  /**
-   * [bindgen] header: /Users/velvetbaldmime/Library/Caches/sbt-vcpkg/vcpkg/packages/libpq_arm64-osx/include/libpq-fe.h
-  */
   def PQfn(conn : Ptr[PGconn], fnid : CInt, result_buf : Ptr[CInt], result_len : Ptr[CInt], result_is_int : CInt, args : Ptr[PQArgBlock], nargs : CInt): Ptr[PGresult] = extern
 
-  /**
-   * [bindgen] header: /Users/velvetbaldmime/Library/Caches/sbt-vcpkg/vcpkg/packages/libpq_arm64-osx/include/libpq-fe.h
-  */
   def PQfname(res : Ptr[PGresult], field_num : CInt): CString = extern
 
-  /**
-   * [bindgen] header: /Users/velvetbaldmime/Library/Caches/sbt-vcpkg/vcpkg/packages/libpq_arm64-osx/include/libpq-fe.h
-  */
   def PQfnumber(res : Ptr[PGresult], field_name : CString): CInt = extern
 
-  /**
-   * [bindgen] header: /Users/velvetbaldmime/Library/Caches/sbt-vcpkg/vcpkg/packages/libpq_arm64-osx/include/libpq-fe.h
-  */
   def PQfreeCancel(cancel : Ptr[PGcancel]): Unit = extern
 
-  /**
-   * [bindgen] header: /Users/velvetbaldmime/Library/Caches/sbt-vcpkg/vcpkg/packages/libpq_arm64-osx/include/libpq-fe.h
-  */
   def PQfreemem(ptr : Ptr[Byte]): Unit = extern
 
-  /**
-   * [bindgen] header: /Users/velvetbaldmime/Library/Caches/sbt-vcpkg/vcpkg/packages/libpq_arm64-osx/include/libpq-fe.h
-  */
   def PQfsize(res : Ptr[PGresult], field_num : CInt): CInt = extern
 
-  /**
-   * [bindgen] header: /Users/velvetbaldmime/Library/Caches/sbt-vcpkg/vcpkg/packages/libpq_arm64-osx/include/libpq-fe.h
-  */
   def PQftable(res : Ptr[PGresult], field_num : CInt): Oid = extern
 
-  /**
-   * [bindgen] header: /Users/velvetbaldmime/Library/Caches/sbt-vcpkg/vcpkg/packages/libpq_arm64-osx/include/libpq-fe.h
-  */
   def PQftablecol(res : Ptr[PGresult], field_num : CInt): CInt = extern
 
-  /**
-   * [bindgen] header: /Users/velvetbaldmime/Library/Caches/sbt-vcpkg/vcpkg/packages/libpq_arm64-osx/include/libpq-fe.h
-  */
   def PQftype(res : Ptr[PGresult], field_num : CInt): Oid = extern
 
-  /**
-   * [bindgen] header: /Users/velvetbaldmime/Library/Caches/sbt-vcpkg/vcpkg/packages/libpq_arm64-osx/include/libpq-fe.h
-  */
   def PQgetCancel(conn : Ptr[PGconn]): Ptr[PGcancel] = extern
 
-  /**
-   * [bindgen] header: /Users/velvetbaldmime/Library/Caches/sbt-vcpkg/vcpkg/packages/libpq_arm64-osx/include/libpq-fe.h
-  */
   def PQgetCopyData(conn : Ptr[PGconn], buffer : Ptr[CString], async : CInt): CInt = extern
 
-  /**
-   * [bindgen] header: /Users/velvetbaldmime/Library/Caches/sbt-vcpkg/vcpkg/packages/libpq_arm64-osx/include/libpq-fe.h
-  */
   def PQgetResult(conn : Ptr[PGconn]): Ptr[PGresult] = extern
 
-  /**
-   * [bindgen] header: /Users/velvetbaldmime/Library/Caches/sbt-vcpkg/vcpkg/packages/libpq_arm64-osx/include/libpq-fe.h
-  */
   def PQgetSSLKeyPassHook_OpenSSL(): PQsslKeyPassHook_OpenSSL_type = extern
 
-  /**
-   * [bindgen] header: /Users/velvetbaldmime/Library/Caches/sbt-vcpkg/vcpkg/packages/libpq_arm64-osx/include/libpq-fe.h
-  */
   def PQgetgssctx(conn : Ptr[PGconn]): Ptr[Byte] = extern
 
-  /**
-   * [bindgen] header: /Users/velvetbaldmime/Library/Caches/sbt-vcpkg/vcpkg/packages/libpq_arm64-osx/include/libpq-fe.h
-  */
   def PQgetisnull(res : Ptr[PGresult], tup_num : CInt, field_num : CInt): CInt = extern
 
-  /**
-   * [bindgen] header: /Users/velvetbaldmime/Library/Caches/sbt-vcpkg/vcpkg/packages/libpq_arm64-osx/include/libpq-fe.h
-  */
   def PQgetlength(res : Ptr[PGresult], tup_num : CInt, field_num : CInt): CInt = extern
 
-  /**
-   * [bindgen] header: /Users/velvetbaldmime/Library/Caches/sbt-vcpkg/vcpkg/packages/libpq_arm64-osx/include/libpq-fe.h
-  */
   def PQgetline(conn : Ptr[PGconn], string : CString, length : CInt): CInt = extern
 
-  /**
-   * [bindgen] header: /Users/velvetbaldmime/Library/Caches/sbt-vcpkg/vcpkg/packages/libpq_arm64-osx/include/libpq-fe.h
-  */
   def PQgetlineAsync(conn : Ptr[PGconn], buffer : CString, bufsize : CInt): CInt = extern
 
-  /**
-   * [bindgen] header: /Users/velvetbaldmime/Library/Caches/sbt-vcpkg/vcpkg/packages/libpq_arm64-osx/include/libpq-fe.h
-  */
   def PQgetssl(conn : Ptr[PGconn]): Ptr[Byte] = extern
 
-  /**
-   * [bindgen] header: /Users/velvetbaldmime/Library/Caches/sbt-vcpkg/vcpkg/packages/libpq_arm64-osx/include/libpq-fe.h
-  */
   def PQgetvalue(res : Ptr[PGresult], tup_num : CInt, field_num : CInt): CString = extern
 
-  /**
-   * [bindgen] header: /Users/velvetbaldmime/Library/Caches/sbt-vcpkg/vcpkg/packages/libpq_arm64-osx/include/libpq-fe.h
-  */
   def PQgssEncInUse(conn : Ptr[PGconn]): CInt = extern
 
-  /**
-   * [bindgen] header: /Users/velvetbaldmime/Library/Caches/sbt-vcpkg/vcpkg/packages/libpq_arm64-osx/include/libpq-fe.h
-  */
   def PQhost(conn : Ptr[PGconn]): CString = extern
 
-  /**
-   * [bindgen] header: /Users/velvetbaldmime/Library/Caches/sbt-vcpkg/vcpkg/packages/libpq_arm64-osx/include/libpq-fe.h
-  */
   def PQhostaddr(conn : Ptr[PGconn]): CString = extern
 
-  /**
-   * [bindgen] header: /Users/velvetbaldmime/Library/Caches/sbt-vcpkg/vcpkg/packages/libpq_arm64-osx/include/libpq-fe.h
-  */
   def PQinitOpenSSL(do_ssl : CInt, do_crypto : CInt): Unit = extern
 
-  /**
-   * [bindgen] header: /Users/velvetbaldmime/Library/Caches/sbt-vcpkg/vcpkg/packages/libpq_arm64-osx/include/libpq-fe.h
-  */
   def PQinitSSL(do_init : CInt): Unit = extern
 
-  /**
-   * [bindgen] header: /Users/velvetbaldmime/Library/Caches/sbt-vcpkg/vcpkg/packages/libpq_arm64-osx/include/libpq-fe.h
-  */
   def PQisBusy(conn : Ptr[PGconn]): CInt = extern
 
-  /**
-   * [bindgen] header: /Users/velvetbaldmime/Library/Caches/sbt-vcpkg/vcpkg/packages/libpq_arm64-osx/include/libpq-fe.h
-  */
   def PQisnonblocking(conn : Ptr[PGconn]): CInt = extern
 
-  /**
-   * [bindgen] header: /Users/velvetbaldmime/Library/Caches/sbt-vcpkg/vcpkg/packages/libpq_arm64-osx/include/libpq-fe.h
-  */
   def PQisthreadsafe(): CInt = extern
 
-  /**
-   * [bindgen] header: /Users/velvetbaldmime/Library/Caches/sbt-vcpkg/vcpkg/packages/libpq_arm64-osx/include/libpq-fe.h
-  */
   def PQlibVersion(): CInt = extern
 
-  /**
-   * [bindgen] header: /Users/velvetbaldmime/Library/Caches/sbt-vcpkg/vcpkg/packages/libpq_arm64-osx/include/libpq-fe.h
-  */
   def PQmakeEmptyPGresult(conn : Ptr[PGconn], status : ExecStatusType): Ptr[PGresult] = extern
 
-  /**
-   * [bindgen] header: /Users/velvetbaldmime/Library/Caches/sbt-vcpkg/vcpkg/packages/libpq_arm64-osx/include/libpq-fe.h
-  */
   def PQmblen(s : CString, encoding : CInt): CInt = extern
 
-  /**
-   * [bindgen] header: /Users/velvetbaldmime/Library/Caches/sbt-vcpkg/vcpkg/packages/libpq_arm64-osx/include/libpq-fe.h
-  */
   def PQmblenBounded(s : CString, encoding : CInt): CInt = extern
 
-  /**
-   * [bindgen] header: /Users/velvetbaldmime/Library/Caches/sbt-vcpkg/vcpkg/packages/libpq_arm64-osx/include/libpq-fe.h
-  */
   def PQnfields(res : Ptr[PGresult]): CInt = extern
 
-  /**
-   * [bindgen] header: /Users/velvetbaldmime/Library/Caches/sbt-vcpkg/vcpkg/packages/libpq_arm64-osx/include/libpq-fe.h
-  */
   def PQnotifies(conn : Ptr[PGconn]): Ptr[PGnotify] = extern
 
-  /**
-   * [bindgen] header: /Users/velvetbaldmime/Library/Caches/sbt-vcpkg/vcpkg/packages/libpq_arm64-osx/include/libpq-fe.h
-  */
   def PQnparams(res : Ptr[PGresult]): CInt = extern
 
-  /**
-   * [bindgen] header: /Users/velvetbaldmime/Library/Caches/sbt-vcpkg/vcpkg/packages/libpq_arm64-osx/include/libpq-fe.h
-  */
   def PQntuples(res : Ptr[PGresult]): CInt = extern
 
-  /**
-   * [bindgen] header: /Users/velvetbaldmime/Library/Caches/sbt-vcpkg/vcpkg/packages/libpq_arm64-osx/include/libpq-fe.h
-  */
   def PQoidStatus(res : Ptr[PGresult]): CString = extern
 
-  /**
-   * [bindgen] header: /Users/velvetbaldmime/Library/Caches/sbt-vcpkg/vcpkg/packages/libpq_arm64-osx/include/libpq-fe.h
-  */
   def PQoidValue(res : Ptr[PGresult]): Oid = extern
 
-  /**
-   * [bindgen] header: /Users/velvetbaldmime/Library/Caches/sbt-vcpkg/vcpkg/packages/libpq_arm64-osx/include/libpq-fe.h
-  */
   def PQoptions(conn : Ptr[PGconn]): CString = extern
 
-  /**
-   * [bindgen] header: /Users/velvetbaldmime/Library/Caches/sbt-vcpkg/vcpkg/packages/libpq_arm64-osx/include/libpq-fe.h
-  */
   def PQparameterStatus(conn : Ptr[PGconn], paramName : CString): CString = extern
 
-  /**
-   * [bindgen] header: /Users/velvetbaldmime/Library/Caches/sbt-vcpkg/vcpkg/packages/libpq_arm64-osx/include/libpq-fe.h
-  */
   def PQparamtype(res : Ptr[PGresult], param_num : CInt): Oid = extern
 
-  /**
-   * [bindgen] header: /Users/velvetbaldmime/Library/Caches/sbt-vcpkg/vcpkg/packages/libpq_arm64-osx/include/libpq-fe.h
-  */
   def PQpass(conn : Ptr[PGconn]): CString = extern
 
-  /**
-   * [bindgen] header: /Users/velvetbaldmime/Library/Caches/sbt-vcpkg/vcpkg/packages/libpq_arm64-osx/include/libpq-fe.h
-  */
   def PQping(conninfo : CString): PGPing = extern
 
-  /**
-   * [bindgen] header: /Users/velvetbaldmime/Library/Caches/sbt-vcpkg/vcpkg/packages/libpq_arm64-osx/include/libpq-fe.h
-  */
   def PQpingParams(keywords : Ptr[CString], values : Ptr[CString], expand_dbname : CInt): PGPing = extern
 
-  /**
-   * [bindgen] header: /Users/velvetbaldmime/Library/Caches/sbt-vcpkg/vcpkg/packages/libpq_arm64-osx/include/libpq-fe.h
-  */
   def PQpipelineStatus(conn : Ptr[PGconn]): PGpipelineStatus = extern
 
-  /**
-   * [bindgen] header: /Users/velvetbaldmime/Library/Caches/sbt-vcpkg/vcpkg/packages/libpq_arm64-osx/include/libpq-fe.h
-  */
   def PQpipelineSync(conn : Ptr[PGconn]): CInt = extern
 
-  /**
-   * [bindgen] header: /Users/velvetbaldmime/Library/Caches/sbt-vcpkg/vcpkg/packages/libpq_arm64-osx/include/libpq-fe.h
-  */
   def PQport(conn : Ptr[PGconn]): CString = extern
 
-  /**
-   * [bindgen] header: /Users/velvetbaldmime/Library/Caches/sbt-vcpkg/vcpkg/packages/libpq_arm64-osx/include/libpq-fe.h
-  */
   def PQprepare(conn : Ptr[PGconn], stmtName : CString, query : CString, nParams : CInt, paramTypes : Ptr[Oid]): Ptr[PGresult] = extern
 
-  /**
-   * [bindgen] header: /Users/velvetbaldmime/Library/Caches/sbt-vcpkg/vcpkg/packages/libpq_arm64-osx/include/libpq-fe.h
-  */
   def PQprint(fout : Ptr[FILE], res : Ptr[PGresult], ps : Ptr[PQprintOpt]): Unit = extern
 
-  /**
-   * [bindgen] header: /Users/velvetbaldmime/Library/Caches/sbt-vcpkg/vcpkg/packages/libpq_arm64-osx/include/libpq-fe.h
-  */
   def PQprintTuples(res : Ptr[PGresult], fout : Ptr[FILE], PrintAttNames : CInt, TerseOutput : CInt, colWidth : CInt): Unit = extern
 
-  /**
-   * [bindgen] header: /Users/velvetbaldmime/Library/Caches/sbt-vcpkg/vcpkg/packages/libpq_arm64-osx/include/libpq-fe.h
-  */
   def PQprotocolVersion(conn : Ptr[PGconn]): CInt = extern
 
-  /**
-   * [bindgen] header: /Users/velvetbaldmime/Library/Caches/sbt-vcpkg/vcpkg/packages/libpq_arm64-osx/include/libpq-fe.h
-  */
   def PQputCopyData(conn : Ptr[PGconn], buffer : CString, nbytes : CInt): CInt = extern
 
-  /**
-   * [bindgen] header: /Users/velvetbaldmime/Library/Caches/sbt-vcpkg/vcpkg/packages/libpq_arm64-osx/include/libpq-fe.h
-  */
   def PQputCopyEnd(conn : Ptr[PGconn], errormsg : CString): CInt = extern
 
-  /**
-   * [bindgen] header: /Users/velvetbaldmime/Library/Caches/sbt-vcpkg/vcpkg/packages/libpq_arm64-osx/include/libpq-fe.h
-  */
   def PQputline(conn : Ptr[PGconn], string : CString): CInt = extern
 
-  /**
-   * [bindgen] header: /Users/velvetbaldmime/Library/Caches/sbt-vcpkg/vcpkg/packages/libpq_arm64-osx/include/libpq-fe.h
-  */
   def PQputnbytes(conn : Ptr[PGconn], buffer : CString, nbytes : CInt): CInt = extern
 
-  /**
-   * [bindgen] header: /Users/velvetbaldmime/Library/Caches/sbt-vcpkg/vcpkg/packages/libpq_arm64-osx/include/libpq-fe.h
-  */
   def PQregisterThreadLock(newhandler : pgthreadlock_t): pgthreadlock_t = extern
 
-  /**
-   * [bindgen] header: /Users/velvetbaldmime/Library/Caches/sbt-vcpkg/vcpkg/packages/libpq_arm64-osx/include/libpq-fe.h
-  */
   def PQrequestCancel(conn : Ptr[PGconn]): CInt = extern
 
-  /**
-   * [bindgen] header: /Users/velvetbaldmime/Library/Caches/sbt-vcpkg/vcpkg/packages/libpq_arm64-osx/include/libpq-fe.h
-  */
   def PQresStatus(status : ExecStatusType): CString = extern
 
-  /**
-   * [bindgen] header: /Users/velvetbaldmime/Library/Caches/sbt-vcpkg/vcpkg/packages/libpq_arm64-osx/include/libpq-fe.h
-  */
   def PQreset(conn : Ptr[PGconn]): Unit = extern
 
-  /**
-   * [bindgen] header: /Users/velvetbaldmime/Library/Caches/sbt-vcpkg/vcpkg/packages/libpq_arm64-osx/include/libpq-fe.h
-  */
   def PQresetPoll(conn : Ptr[PGconn]): PostgresPollingStatusType = extern
 
-  /**
-   * [bindgen] header: /Users/velvetbaldmime/Library/Caches/sbt-vcpkg/vcpkg/packages/libpq_arm64-osx/include/libpq-fe.h
-  */
   def PQresetStart(conn : Ptr[PGconn]): CInt = extern
 
-  /**
-   * [bindgen] header: /Users/velvetbaldmime/Library/Caches/sbt-vcpkg/vcpkg/packages/libpq_arm64-osx/include/libpq-fe.h
-  */
   def PQresultAlloc(res : Ptr[PGresult], nBytes : size_t): Ptr[Byte] = extern
 
-  /**
-   * [bindgen] header: /Users/velvetbaldmime/Library/Caches/sbt-vcpkg/vcpkg/packages/libpq_arm64-osx/include/libpq-fe.h
-  */
   def PQresultErrorField(res : Ptr[PGresult], fieldcode : CInt): CString = extern
 
-  /**
-   * [bindgen] header: /Users/velvetbaldmime/Library/Caches/sbt-vcpkg/vcpkg/packages/libpq_arm64-osx/include/libpq-fe.h
-  */
   def PQresultErrorMessage(res : Ptr[PGresult]): CString = extern
 
-  /**
-   * [bindgen] header: /Users/velvetbaldmime/Library/Caches/sbt-vcpkg/vcpkg/packages/libpq_arm64-osx/include/libpq-fe.h
-  */
   def PQresultMemorySize(res : Ptr[PGresult]): size_t = extern
 
-  /**
-   * [bindgen] header: /Users/velvetbaldmime/Library/Caches/sbt-vcpkg/vcpkg/packages/libpq_arm64-osx/include/libpq-fe.h
-  */
   def PQresultStatus(res : Ptr[PGresult]): ExecStatusType = extern
 
-  /**
-   * [bindgen] header: /Users/velvetbaldmime/Library/Caches/sbt-vcpkg/vcpkg/packages/libpq_arm64-osx/include/libpq-fe.h
-  */
   def PQresultVerboseErrorMessage(res : Ptr[PGresult], verbosity : PGVerbosity, show_context : PGContextVisibility): CString = extern
 
-  /**
-   * [bindgen] header: /Users/velvetbaldmime/Library/Caches/sbt-vcpkg/vcpkg/packages/libpq_arm64-osx/include/libpq-fe.h
-  */
   def PQsendDescribePortal(conn : Ptr[PGconn], portal : CString): CInt = extern
 
-  /**
-   * [bindgen] header: /Users/velvetbaldmime/Library/Caches/sbt-vcpkg/vcpkg/packages/libpq_arm64-osx/include/libpq-fe.h
-  */
   def PQsendDescribePrepared(conn : Ptr[PGconn], stmt : CString): CInt = extern
 
-  /**
-   * [bindgen] header: /Users/velvetbaldmime/Library/Caches/sbt-vcpkg/vcpkg/packages/libpq_arm64-osx/include/libpq-fe.h
-  */
   def PQsendFlushRequest(conn : Ptr[PGconn]): CInt = extern
 
-  /**
-   * [bindgen] header: /Users/velvetbaldmime/Library/Caches/sbt-vcpkg/vcpkg/packages/libpq_arm64-osx/include/libpq-fe.h
-  */
   def PQsendPrepare(conn : Ptr[PGconn], stmtName : CString, query : CString, nParams : CInt, paramTypes : Ptr[Oid]): CInt = extern
 
-  /**
-   * [bindgen] header: /Users/velvetbaldmime/Library/Caches/sbt-vcpkg/vcpkg/packages/libpq_arm64-osx/include/libpq-fe.h
-  */
   def PQsendQuery(conn : Ptr[PGconn], query : CString): CInt = extern
 
-  /**
-   * [bindgen] header: /Users/velvetbaldmime/Library/Caches/sbt-vcpkg/vcpkg/packages/libpq_arm64-osx/include/libpq-fe.h
-  */
   def PQsendQueryParams(conn : Ptr[PGconn], command : CString, nParams : CInt, paramTypes : Ptr[Oid], paramValues : Ptr[CString], paramLengths : Ptr[CInt], paramFormats : Ptr[CInt], resultFormat : CInt): CInt = extern
 
-  /**
-   * [bindgen] header: /Users/velvetbaldmime/Library/Caches/sbt-vcpkg/vcpkg/packages/libpq_arm64-osx/include/libpq-fe.h
-  */
   def PQsendQueryPrepared(conn : Ptr[PGconn], stmtName : CString, nParams : CInt, paramValues : Ptr[CString], paramLengths : Ptr[CInt], paramFormats : Ptr[CInt], resultFormat : CInt): CInt = extern
 
-  /**
-   * [bindgen] header: /Users/velvetbaldmime/Library/Caches/sbt-vcpkg/vcpkg/packages/libpq_arm64-osx/include/libpq-fe.h
-  */
   def PQserverVersion(conn : Ptr[PGconn]): CInt = extern
 
-  /**
-   * [bindgen] header: /Users/velvetbaldmime/Library/Caches/sbt-vcpkg/vcpkg/packages/libpq_arm64-osx/include/libpq-fe.h
-  */
   def PQsetClientEncoding(conn : Ptr[PGconn], encoding : CString): CInt = extern
 
-  /**
-   * [bindgen] header: /Users/velvetbaldmime/Library/Caches/sbt-vcpkg/vcpkg/packages/libpq_arm64-osx/include/libpq-fe.h
-  */
   def PQsetErrorContextVisibility(conn : Ptr[PGconn], show_context : PGContextVisibility): PGContextVisibility = extern
 
-  /**
-   * [bindgen] header: /Users/velvetbaldmime/Library/Caches/sbt-vcpkg/vcpkg/packages/libpq_arm64-osx/include/libpq-fe.h
-  */
   def PQsetErrorVerbosity(conn : Ptr[PGconn], verbosity : PGVerbosity): PGVerbosity = extern
 
-  /**
-   * [bindgen] header: /Users/velvetbaldmime/Library/Caches/sbt-vcpkg/vcpkg/packages/libpq_arm64-osx/include/libpq-fe.h
-  */
   def PQsetNoticeProcessor(conn : Ptr[PGconn], proc : PQnoticeProcessor, arg : Ptr[Byte]): PQnoticeProcessor = extern
 
-  /**
-   * [bindgen] header: /Users/velvetbaldmime/Library/Caches/sbt-vcpkg/vcpkg/packages/libpq_arm64-osx/include/libpq-fe.h
-  */
   def PQsetNoticeReceiver(conn : Ptr[PGconn], proc : PQnoticeReceiver, arg : Ptr[Byte]): PQnoticeReceiver = extern
 
-  /**
-   * [bindgen] header: /Users/velvetbaldmime/Library/Caches/sbt-vcpkg/vcpkg/packages/libpq_arm64-osx/include/libpq-fe.h
-  */
   def PQsetResultAttrs(res : Ptr[PGresult], numAttributes : CInt, attDescs : Ptr[PGresAttDesc]): CInt = extern
 
-  /**
-   * [bindgen] header: /Users/velvetbaldmime/Library/Caches/sbt-vcpkg/vcpkg/packages/libpq_arm64-osx/include/libpq-fe.h
-  */
   def PQsetSSLKeyPassHook_OpenSSL(hook : PQsslKeyPassHook_OpenSSL_type): Unit = extern
 
-  /**
-   * [bindgen] header: /Users/velvetbaldmime/Library/Caches/sbt-vcpkg/vcpkg/packages/libpq_arm64-osx/include/libpq-fe.h
-  */
   def PQsetSingleRowMode(conn : Ptr[PGconn]): CInt = extern
 
-  /**
-   * [bindgen] header: /Users/velvetbaldmime/Library/Caches/sbt-vcpkg/vcpkg/packages/libpq_arm64-osx/include/libpq-fe.h
-  */
   def PQsetTraceFlags(conn : Ptr[PGconn], flags : CInt): Unit = extern
 
-  /**
-   * [bindgen] header: /Users/velvetbaldmime/Library/Caches/sbt-vcpkg/vcpkg/packages/libpq_arm64-osx/include/libpq-fe.h
-  */
   def PQsetdbLogin(pghost : CString, pgport : CString, pgoptions : CString, pgtty : CString, dbName : CString, login : CString, pwd : CString): Ptr[PGconn] = extern
 
-  /**
-   * [bindgen] header: /Users/velvetbaldmime/Library/Caches/sbt-vcpkg/vcpkg/packages/libpq_arm64-osx/include/libpq-fe.h
-  */
   def PQsetnonblocking(conn : Ptr[PGconn], arg : CInt): CInt = extern
 
-  /**
-   * [bindgen] header: /Users/velvetbaldmime/Library/Caches/sbt-vcpkg/vcpkg/packages/libpq_arm64-osx/include/libpq-fe.h
-  */
   def PQsetvalue(res : Ptr[PGresult], tup_num : CInt, field_num : CInt, value : CString, len : CInt): CInt = extern
 
-  /**
-   * [bindgen] header: /Users/velvetbaldmime/Library/Caches/sbt-vcpkg/vcpkg/packages/libpq_arm64-osx/include/libpq-fe.h
-  */
   def PQsocket(conn : Ptr[PGconn]): CInt = extern
 
-  /**
-   * [bindgen] header: /Users/velvetbaldmime/Library/Caches/sbt-vcpkg/vcpkg/packages/libpq_arm64-osx/include/libpq-fe.h
-  */
   def PQsslAttribute(conn : Ptr[PGconn], attribute_name : CString): CString = extern
 
-  /**
-   * [bindgen] header: /Users/velvetbaldmime/Library/Caches/sbt-vcpkg/vcpkg/packages/libpq_arm64-osx/include/libpq-fe.h
-  */
   def PQsslAttributeNames(conn : Ptr[PGconn]): Ptr[CString] = extern
 
-  /**
-   * [bindgen] header: /Users/velvetbaldmime/Library/Caches/sbt-vcpkg/vcpkg/packages/libpq_arm64-osx/include/libpq-fe.h
-  */
   def PQsslInUse(conn : Ptr[PGconn]): CInt = extern
 
-  /**
-   * [bindgen] header: /Users/velvetbaldmime/Library/Caches/sbt-vcpkg/vcpkg/packages/libpq_arm64-osx/include/libpq-fe.h
-  */
   def PQsslStruct(conn : Ptr[PGconn], struct_name : CString): Ptr[Byte] = extern
 
-  /**
-   * [bindgen] header: /Users/velvetbaldmime/Library/Caches/sbt-vcpkg/vcpkg/packages/libpq_arm64-osx/include/libpq-fe.h
-  */
   def PQstatus(conn : Ptr[PGconn]): ConnStatusType = extern
 
-  /**
-   * [bindgen] header: /Users/velvetbaldmime/Library/Caches/sbt-vcpkg/vcpkg/packages/libpq_arm64-osx/include/libpq-fe.h
-  */
   def PQtrace(conn : Ptr[PGconn], debug_port : Ptr[FILE]): Unit = extern
 
-  /**
-   * [bindgen] header: /Users/velvetbaldmime/Library/Caches/sbt-vcpkg/vcpkg/packages/libpq_arm64-osx/include/libpq-fe.h
-  */
   def PQtransactionStatus(conn : Ptr[PGconn]): PGTransactionStatusType = extern
 
-  /**
-   * [bindgen] header: /Users/velvetbaldmime/Library/Caches/sbt-vcpkg/vcpkg/packages/libpq_arm64-osx/include/libpq-fe.h
-  */
   def PQtty(conn : Ptr[PGconn]): CString = extern
 
-  /**
-   * [bindgen] header: /Users/velvetbaldmime/Library/Caches/sbt-vcpkg/vcpkg/packages/libpq_arm64-osx/include/libpq-fe.h
-  */
   def PQunescapeBytea(strtext : Ptr[CUnsignedChar], retbuflen : Ptr[size_t]): Ptr[CUnsignedChar] = extern
 
-  /**
-   * [bindgen] header: /Users/velvetbaldmime/Library/Caches/sbt-vcpkg/vcpkg/packages/libpq_arm64-osx/include/libpq-fe.h
-  */
   def PQuntrace(conn : Ptr[PGconn]): Unit = extern
 
-  /**
-   * [bindgen] header: /Users/velvetbaldmime/Library/Caches/sbt-vcpkg/vcpkg/packages/libpq_arm64-osx/include/libpq-fe.h
-  */
   def PQuser(conn : Ptr[PGconn]): CString = extern
 
-  /**
-   * [bindgen] header: /Users/velvetbaldmime/Library/Caches/sbt-vcpkg/vcpkg/packages/libpq_arm64-osx/include/libpq-fe.h
-  */
   def lo_close(conn : Ptr[PGconn], fd : CInt): CInt = extern
 
-  /**
-   * [bindgen] header: /Users/velvetbaldmime/Library/Caches/sbt-vcpkg/vcpkg/packages/libpq_arm64-osx/include/libpq-fe.h
-  */
   def lo_creat(conn : Ptr[PGconn], mode : CInt): Oid = extern
 
-  /**
-   * [bindgen] header: /Users/velvetbaldmime/Library/Caches/sbt-vcpkg/vcpkg/packages/libpq_arm64-osx/include/libpq-fe.h
-  */
   def lo_create(conn : Ptr[PGconn], lobjId : Oid): Oid = extern
 
-  /**
-   * [bindgen] header: /Users/velvetbaldmime/Library/Caches/sbt-vcpkg/vcpkg/packages/libpq_arm64-osx/include/libpq-fe.h
-  */
   def lo_export(conn : Ptr[PGconn], lobjId : Oid, filename : CString): CInt = extern
 
-  /**
-   * [bindgen] header: /Users/velvetbaldmime/Library/Caches/sbt-vcpkg/vcpkg/packages/libpq_arm64-osx/include/libpq-fe.h
-  */
   def lo_import(conn : Ptr[PGconn], filename : CString): Oid = extern
 
-  /**
-   * [bindgen] header: /Users/velvetbaldmime/Library/Caches/sbt-vcpkg/vcpkg/packages/libpq_arm64-osx/include/libpq-fe.h
-  */
   def lo_import_with_oid(conn : Ptr[PGconn], filename : CString, lobjId : Oid): Oid = extern
 
-  /**
-   * [bindgen] header: /Users/velvetbaldmime/Library/Caches/sbt-vcpkg/vcpkg/packages/libpq_arm64-osx/include/libpq-fe.h
-  */
   def lo_lseek(conn : Ptr[PGconn], fd : CInt, offset : CInt, whence : CInt): CInt = extern
 
-  /**
-   * [bindgen] header: /Users/velvetbaldmime/Library/Caches/sbt-vcpkg/vcpkg/packages/libpq_arm64-osx/include/libpq-fe.h
-  */
   def lo_lseek64(conn : Ptr[PGconn], fd : CInt, offset : pg_int64, whence : CInt): pg_int64 = extern
 
-  /**
-   * [bindgen] header: /Users/velvetbaldmime/Library/Caches/sbt-vcpkg/vcpkg/packages/libpq_arm64-osx/include/libpq-fe.h
-  */
   def lo_open(conn : Ptr[PGconn], lobjId : Oid, mode : CInt): CInt = extern
 
-  /**
-   * [bindgen] header: /Users/velvetbaldmime/Library/Caches/sbt-vcpkg/vcpkg/packages/libpq_arm64-osx/include/libpq-fe.h
-  */
   def lo_read(conn : Ptr[PGconn], fd : CInt, buf : CString, len : size_t): CInt = extern
 
-  /**
-   * [bindgen] header: /Users/velvetbaldmime/Library/Caches/sbt-vcpkg/vcpkg/packages/libpq_arm64-osx/include/libpq-fe.h
-  */
   def lo_tell(conn : Ptr[PGconn], fd : CInt): CInt = extern
 
-  /**
-   * [bindgen] header: /Users/velvetbaldmime/Library/Caches/sbt-vcpkg/vcpkg/packages/libpq_arm64-osx/include/libpq-fe.h
-  */
   def lo_tell64(conn : Ptr[PGconn], fd : CInt): pg_int64 = extern
 
-  /**
-   * [bindgen] header: /Users/velvetbaldmime/Library/Caches/sbt-vcpkg/vcpkg/packages/libpq_arm64-osx/include/libpq-fe.h
-  */
   def lo_truncate(conn : Ptr[PGconn], fd : CInt, len : size_t): CInt = extern
 
-  /**
-   * [bindgen] header: /Users/velvetbaldmime/Library/Caches/sbt-vcpkg/vcpkg/packages/libpq_arm64-osx/include/libpq-fe.h
-  */
   def lo_truncate64(conn : Ptr[PGconn], fd : CInt, len : pg_int64): CInt = extern
 
-  /**
-   * [bindgen] header: /Users/velvetbaldmime/Library/Caches/sbt-vcpkg/vcpkg/packages/libpq_arm64-osx/include/libpq-fe.h
-  */
   def lo_unlink(conn : Ptr[PGconn], lobjId : Oid): CInt = extern
 
-  /**
-   * [bindgen] header: /Users/velvetbaldmime/Library/Caches/sbt-vcpkg/vcpkg/packages/libpq_arm64-osx/include/libpq-fe.h
-  */
   def lo_write(conn : Ptr[PGconn], fd : CInt, buf : CString, len : size_t): CInt = extern
 
-  /**
-   * [bindgen] header: /Users/velvetbaldmime/Library/Caches/sbt-vcpkg/vcpkg/packages/libpq_arm64-osx/include/libpq-fe.h
-  */
   def pg_char_to_encoding(name : CString): CInt = extern
 
-  /**
-   * [bindgen] header: /Users/velvetbaldmime/Library/Caches/sbt-vcpkg/vcpkg/packages/libpq_arm64-osx/include/libpq-fe.h
-  */
   def pg_encoding_to_char(encoding : CInt): CString = extern
 
-  /**
-   * [bindgen] header: /Users/velvetbaldmime/Library/Caches/sbt-vcpkg/vcpkg/packages/libpq_arm64-osx/include/libpq-fe.h
-  */
   def pg_valid_server_encoding_id(encoding : CInt): CInt = extern
 
 
 object functions:
   import _root_.libpq.enumerations.*
+  import _root_.libpq.predef.*
   import _root_.libpq.aliases.*
   import _root_.libpq.structs.*
-
   import extern_functions.*
   export extern_functions.*
 

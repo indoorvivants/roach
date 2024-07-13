@@ -2,6 +2,7 @@ package roach.tests
 
 import roach.*
 import roach.codecs.*
+import scala.scalanative.unsafe.Zone
 
 class QueryTests extends munit.FunSuite, TestHarness:
   override def tableCreationSQL = Some(tableName => s"""
@@ -16,7 +17,7 @@ class QueryTests extends munit.FunSuite, TestHarness:
   test("with input parameters") {
     val q = Query(s"select * from $tableName where key = $$1", int4)
     val qMore = Query(s"select * from $tableName where key >= $$1", int4)
-    zone {
+    Zone {
       withDB {
         assertEquals(q.all(25, int4 ~ text), Vector(25 -> "hello"))
         assertEquals(q.all(150, int4 ~ text), Vector.empty)
@@ -37,7 +38,7 @@ class QueryTests extends munit.FunSuite, TestHarness:
     val q =
       Query(s"select * from $tableName where value != 'testies' order by key")
 
-    zone {
+    Zone {
       withDB {
         assertEquals(q.all(int4 ~ text), Vector(25 -> "hello", 42 -> "bye"))
 

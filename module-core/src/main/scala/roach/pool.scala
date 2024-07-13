@@ -51,13 +51,13 @@ private[roach] class Single private (
   def reconnect(): Validated[Database] =
     Database.apply(connString).map { db =>
       db.unsafely { conn =>
-        PQsetNoticeProcessor(
+        val proc = PQsetNoticeProcessor(
           conn,
           PQnoticeProcessor { (arg: Ptr[Byte], msg: CString) =>
             val handler = arg.asInstanceOf[Ptr[String => Unit]]
-            Zone { implicit z =>
+            Zone(
               (!handler).apply(fromCString(msg))
-            }
+            )
           },
           captured.asInstanceOf[Ptr[Byte]]
         )
@@ -65,8 +65,16 @@ private[roach] class Single private (
 
       db
     }
+  end reconnect
 
   def lease[A](f: Database => A): A =
+    if scalanative.meta.LinktimeInfo.isMultithreadingEnabled then
+      slot.synchronized:
+        singleThreadedLogic(f) // YOLO
+    else singleThreadedLogic(f)
+  end lease
+
+  private inline def singleThreadedLogic[A](f: Database => A) =
     slot match
       case Slot.Available(db) =>
         var result: A | Null = null
@@ -96,6 +104,8 @@ private[roach] class Single private (
               " This suggests the library implementation is wrong"
           )
           .raise
+    end match
+  end singleThreadedLogic
 
 end Single
 

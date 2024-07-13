@@ -38,7 +38,7 @@ class BasicTests extends munit.FunSuite, TestHarness:
     """)
 
   test("super basics") {
-    zone {
+    Zone {
       withDB { db ?=>
         query(
           "SELECT oid::int4, typname from pg_type where typname in ('bool', 'int4', 'varchar')"
@@ -54,7 +54,7 @@ class BasicTests extends munit.FunSuite, TestHarness:
   }
 
   test("arrays") {
-    zone {
+    Zone {
       withDB { db ?=>
         query(
           "SELECT ARRAY[ARRAY['hпрd^sâветe\"l,lo'], ARRAY['bla']]"
@@ -103,7 +103,7 @@ class BasicTests extends munit.FunSuite, TestHarness:
 
     val rowCodec = codec.as[Row]
 
-    zone {
+    Zone {
       withDB { db ?=>
         def row(opt: Boolean) = Row(
           id = s"opt_$opt",
@@ -160,7 +160,7 @@ class BasicTests extends munit.FunSuite, TestHarness:
     }
 
   test("connection status and termination") {
-    zone {
+    Zone {
       withDB { db ?=>
         assert(db.connectionIsOkay)
 
@@ -173,7 +173,7 @@ class BasicTests extends munit.FunSuite, TestHarness:
   }
 
   test("single slot pool") {
-    zone {
+    Zone {
       Pool.single(connectionString) { pool =>
         var old: Database | Null = null
 
@@ -216,7 +216,7 @@ class BasicTests extends munit.FunSuite, TestHarness:
   test("pool notice processor") {
     val messages = List.newBuilder[String]
     val tableName = s"my_table_bla_${Random.nextInt().abs}"
-    zone {
+    Zone {
       Pool.single(connectionString, s => messages.addOne(s.trim)) { pool =>
         pool.withLease {
 
@@ -237,7 +237,7 @@ class BasicTests extends munit.FunSuite, TestHarness:
   }
 
   test("execute error params") {
-    zone {
+    Zone {
       withDB { db ?=>
         db.executeParams(
           "select oid::int4 from pg_type where typname = $1",
@@ -254,7 +254,7 @@ class BasicTests extends munit.FunSuite, TestHarness:
   }
 
   test("execute error capturing") {
-    zone {
+    Zone {
       withDB { db ?=>
         val msg = db
           .executeParams(
@@ -274,7 +274,7 @@ class BasicTests extends munit.FunSuite, TestHarness:
   }
 
   test("prepared") {
-    zone {
+    Zone {
       withDB { db ?=>
         val single = db
           .prepare(

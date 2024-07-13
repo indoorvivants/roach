@@ -4,13 +4,13 @@ import java.nio.file.Paths
 Global / onChangedBuildSource := ReloadOnSourceChanges
 
 val Versions = new {
-  val Scala = "3.3.1"
+  val Scala = "3.3.3"
 
-  val circe = "0.14.6"
+  val circe = "0.14.9"
 
-  val munit = "1.0.0-M11"
+  val munit = "1.0.0"
 
-  val upickle = "3.2.0"
+  val upickle = "3.3.1"
 }
 
 import bindgen.interface.*
@@ -36,8 +36,7 @@ lazy val core =
       Compile / bindgenBindings += {
         val configurator = vcpkgConfigurator.value
 
-        Binding
-          .builder(configurator.includes("libpq") / "libpq-fe.h", "libpq")
+        Binding(configurator.includes("libpq") / "libpq-fe.h", "libpq")
           .withLinkName("pq")
           .addCImport("libpq-fe.h")
           .withClangFlags(
@@ -45,13 +44,14 @@ lazy val core =
               .updateCompilationFlags(List("-std=gnu99"), "libpq")
               .toList
           )
-          .build
+          .withNoLocation(true)
       },
       bindgenMode := BindgenMode.Manual(
         sourceDirectory.value / "main" / "scala" / "generated",
         (Compile / resourceDirectory).value / "scala-native"
       ),
-      moduleName := "core"
+      moduleName := "core",
+      configurePlatform
     )
 
 lazy val upickle =
@@ -64,6 +64,7 @@ lazy val upickle =
     )
     .settings(moduleName := "upickle")
     .settings(common)
+    .settings(configurePlatform)
 
 lazy val circe =
   project
@@ -75,13 +76,14 @@ lazy val circe =
     )
     .settings(moduleName := "circe")
     .settings(common)
+    .settings(configurePlatform)
 
 val common = Seq(
   organization := "com.indoorvivants.roach",
   scalaVersion := Versions.Scala,
   libraryDependencies += "org.scalameta" %%% "munit" % Versions.munit % Test,
   resolvers ++= Resolver.sonatypeOssRepos("snapshots"),
-  vcpkgDependencies := Set("libpq")
+  vcpkgDependencies := VcpkgDependencies("libpq")
 )
 
 lazy val docs =
@@ -127,3 +129,26 @@ inThisBuild(
 )
 
 addCommandAlias("checkDocs", "docs/mdoc --in README.md")
+
+val configurePlatform = Seq(
+  nativeConfig := {
+    import com.indoorvivants.detective.*
+    val conf = nativeConfig.value
+    val arch64 =
+      if (
+        Platform.arch == Platform.Arch.Arm && Platform.bits == Platform.Bits.x64
+      )
+        List("-arch", "arm64")
+      else Nil
+
+    conf
+      .withLinkingOptions(
+        conf.linkingOptions ++ arch64
+      )
+      .withCompileOptions(
+        conf.compileOptions ++ arch64
+      )
+      .withIncrementalCompilation(true)
+      .withMultithreading(true)
+  }
+)

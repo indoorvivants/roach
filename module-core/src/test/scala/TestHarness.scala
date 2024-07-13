@@ -14,8 +14,6 @@ trait TestHarness:
   val connectionString =
     s"postgresql://postgres:mysecretpassword@localhost:5432/postgres?application_name=$appName"
 
-  inline def zone[A](inline f: Zone ?=> A) = Zone.apply(z => f(using z))
-
   def withDB(f: Database ?=> Unit)(using Zone) =
     Using.resource(Database(connectionString).getOrThrow)(db => f(using db))
 
@@ -34,7 +32,7 @@ trait TestHarness:
   // Runs once before all tests start.
   override def beforeAll(): Unit =
     tableCreationSQL.foreach { sql =>
-      zone {
+      Zone {
         withDB { db ?=>
           val prepTableName = s"${tablePrefix}_${util.Random().nextLong.abs}"
           db.execute(sql(prepTableName)).getOrThrow
@@ -45,7 +43,7 @@ trait TestHarness:
     }
 
   override def afterAll(): Unit =
-    zone {
+    Zone {
       withDB { db ?=>
         if tableName != null then
           db.execute(s"drop table $tableName").getOrThrow

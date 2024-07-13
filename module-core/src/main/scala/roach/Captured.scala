@@ -4,14 +4,14 @@ import scala.scalanative.unsafe.*
 
 private[roach] object Captured:
   def unsafe[D <: AnyRef: Tag](value: D): (Ptr[D], Memory) =
-    import scalanative.runtime.*
+    import scalanative.runtime.*, ffi.*
 
-    val rawptr = libc.malloc(sizeof[D])
+    val rawptr = malloc(sizeof[D])
     val mem = fromRawPtr[D](rawptr)
     val deallocate: Memory =
       () =>
         GCRoots.removeRoot(value.asInstanceOf[Object])
-        libc.free(toRawPtr[D](mem))
+        free(toRawPtr[D](mem))
 
     val originalAddress = Intrinsics.castObjectToRawPtr(value)
 
