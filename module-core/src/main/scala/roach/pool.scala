@@ -51,7 +51,7 @@ private[roach] class Single private (
   def reconnect(): Validated[Database] =
     Database.apply(connString).map { db =>
       db.unsafely { conn =>
-        PQsetNoticeProcessor(
+        val proc = PQsetNoticeProcessor(
           conn,
           PQnoticeProcessor { (arg: Ptr[Byte], msg: CString) =>
             val handler = arg.asInstanceOf[Ptr[String => Unit]]
@@ -96,6 +96,8 @@ private[roach] class Single private (
               " This suggests the library implementation is wrong"
           )
           .raise
+    end match
+  end lease
 
 end Single
 

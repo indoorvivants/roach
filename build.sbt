@@ -4,9 +4,9 @@ import java.nio.file.Paths
 Global / onChangedBuildSource := ReloadOnSourceChanges
 
 val Versions = new {
-  val Scala = "3.3.1"
+  val Scala = "3.3.3"
 
-  val circe = "0.14.6"
+  val circe = "0.14.9"
 
   val munit = "1.0.0"
 
@@ -18,7 +18,7 @@ import bindgen.interface.*
 lazy val root =
   project
     .in(file("."))
-    .aggregate(core, /*circe,*/ upickle)
+    .aggregate(core, circe, upickle)
     .settings(publish / skip := true)
 
 lazy val core =
@@ -44,12 +44,14 @@ lazy val core =
               .updateCompilationFlags(List("-std=gnu99"), "libpq")
               .toList
           )
+          .withNoLocation(true)
       },
       bindgenMode := BindgenMode.Manual(
         sourceDirectory.value / "main" / "scala" / "generated",
         (Compile / resourceDirectory).value / "scala-native"
       ),
-      moduleName := "core"
+      moduleName := "core",
+      configurePlatform
     )
 
 lazy val upickle =
@@ -63,17 +65,17 @@ lazy val upickle =
     .settings(moduleName := "upickle")
     .settings(common)
 
-// lazy val circe =
-//   project
-//     .in(file("module-circe"))
-//     .dependsOn(core % "compile->compile;test->test")
-//     .enablePlugins(ScalaNativePlugin, VcpkgNativePlugin, BindgenPlugin)
-//     .settings(
-//       libraryDependencies += "io.circe" %%% "circe-parser" % Versions.circe
-//     )
-//     .settings(moduleName := "circe")
-//     .settings(common)
-//
+lazy val circe =
+  project
+    .in(file("module-circe"))
+    .dependsOn(core % "compile->compile;test->test")
+    .enablePlugins(ScalaNativePlugin, VcpkgNativePlugin, BindgenPlugin)
+    .settings(
+      libraryDependencies += "io.circe" %%% "circe-parser" % Versions.circe
+    )
+    .settings(moduleName := "circe")
+    .settings(common)
+
 val common = Seq(
   organization := "com.indoorvivants.roach",
   scalaVersion := Versions.Scala,
@@ -87,7 +89,7 @@ lazy val docs =
     .in(file("target/.docs-target"))
     .enablePlugins(MdocPlugin)
     .settings(scalaVersion := Versions.Scala)
-    .dependsOn(core, /*circe,*/ upickle)
+    .dependsOn(core, circe, upickle)
     .settings(
       publish / skip := true,
       Compile / resourceGenerators += Def.task {
@@ -125,3 +127,25 @@ inThisBuild(
 )
 
 addCommandAlias("checkDocs", "docs/mdoc --in README.md")
+
+val configurePlatform = Seq(
+  nativeConfig := {
+    import com.indoorvivants.detective.*
+    val conf = nativeConfig.value
+    val arch64 =
+      if (
+        Platform.arch == Platform.Arch.Arm && Platform.bits == Platform.Bits.x64
+      )
+        List("-arch", "arm64")
+      else Nil
+
+    conf
+      .withLinkingOptions(
+        conf.linkingOptions ++ arch64
+      )
+      .withCompileOptions(
+        conf.compileOptions ++ arch64
+      )
+      .withIncrementalCompilation(true)
+  }
+)

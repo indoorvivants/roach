@@ -5,6 +5,7 @@ import roach.codecs.*
 import io.circe.Json
 import io.circe.JsonNumber
 import roach.Pool
+import scala.scalanative.unsafe.Zone
 
 class CirceTests extends munit.FunSuite with roach.tests.TestHarness:
 
@@ -18,7 +19,7 @@ class CirceTests extends munit.FunSuite with roach.tests.TestHarness:
           """)
 
   test("read: raw json") {
-    zone {
+    Zone {
       withDB { db ?=>
         val q =
           """SELECT '{"bar": "baz", "balance": 7.77, "active": false}'::json"""
@@ -40,7 +41,7 @@ class CirceTests extends munit.FunSuite with roach.tests.TestHarness:
 
     import io.circe.syntax.*
 
-    zone {
+    Zone {
       withDB { db ?=>
         val row = (512L, Json.obj("hello" := "world", "bla" := 25))
         db.executeParams(
@@ -62,7 +63,7 @@ class CirceTests extends munit.FunSuite with roach.tests.TestHarness:
 
     case class Testi(hello: String, bla: Int) derives io.circe.Codec.AsObject
 
-    zone {
+    Zone {
       withDB { db ?=>
         val row = (1024L, Testi("yo", 152))
 
@@ -83,7 +84,7 @@ class CirceTests extends munit.FunSuite with roach.tests.TestHarness:
     case class Top(bar: String, balance: Double, active: Boolean)
         derives io.circe.Codec.AsObject
 
-    zone {
+    Zone {
       withDB { db ?=>
         val q =
           """SELECT '{"bar": "baz", "balance": 7.77, "active": false}'::json"""

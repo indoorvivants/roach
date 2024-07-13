@@ -2,6 +2,7 @@ package roach.tests
 
 import roach.*
 import roach.codecs.*
+import scala.scalanative.unsafe.Zone
 
 class SqlInterpolatorTests extends munit.FunSuite, TestHarness:
   override def tableCreationSQL = Some(tableName => s"""
@@ -14,7 +15,7 @@ class SqlInterpolatorTests extends munit.FunSuite, TestHarness:
     """)
 
   test("fragments") {
-    zone {
+    Zone {
       withDB {
         val fr1 = Fragment("key,value")
         val q = sql"select $fr1 from $tableName where key = 25".all(int4 ~ text)
@@ -34,7 +35,7 @@ class SqlInterpolatorTests extends munit.FunSuite, TestHarness:
   }
 
   test("basics") {
-    zone {
+    Zone {
       withDB {
 
         case class Data(key: Int, value: String)

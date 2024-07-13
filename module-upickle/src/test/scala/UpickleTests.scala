@@ -4,6 +4,7 @@ import roach.upickle.*
 import roach.codecs.*
 import roach.Pool
 import ujson.Value
+import scala.scalanative.unsafe.Zone
 
 class UpickleTests extends munit.FunSuite with roach.tests.TestHarness:
 
@@ -17,7 +18,7 @@ class UpickleTests extends munit.FunSuite with roach.tests.TestHarness:
           """)
 
   test("read: raw json") {
-    zone {
+    Zone {
       withDB { db ?=>
         val q =
           """SELECT '{"bar": "baz", "balance": 7.77, "active": false}'::json"""
@@ -34,7 +35,7 @@ class UpickleTests extends munit.FunSuite with roach.tests.TestHarness:
 
   test("write: raw json") {
 
-    zone {
+    Zone {
       withDB { db ?=>
         val row = (
           512L,
@@ -57,7 +58,7 @@ class UpickleTests extends munit.FunSuite with roach.tests.TestHarness:
 
     case class Testi(hello: String, bla: Int) derives upickle.default.ReadWriter
 
-    zone {
+    Zone {
       withDB { db ?=>
         val row = (1024L, Testi("yo", 152))
 
@@ -77,7 +78,7 @@ class UpickleTests extends munit.FunSuite with roach.tests.TestHarness:
   test("read: json codec") {
     case class Top(bar: String, balance: Double, active: Boolean)
         derives upickle.default.ReadWriter
-    zone {
+    Zone {
       withDB { db ?=>
         val q =
           """SELECT '{"bar": "baz", "balance": 7.77, "active": false}'::json"""

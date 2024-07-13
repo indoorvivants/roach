@@ -2,10 +2,11 @@ package roach.tests
 
 import roach.codecs.*
 import roach.*
+import scala.scalanative.unsafe.Zone
 
 class MigrationTests extends munit.FunSuite, TestHarness:
   test("basic usage") {
-    zone {
+    Zone {
       Pool.single(connectionString) { pool =>
         cleanup(pool)("migration_test_1", "howdy") { () =>
 
@@ -41,7 +42,7 @@ class MigrationTests extends munit.FunSuite, TestHarness:
 
   test("migration is idempotent") {
     val tst = "migration_test_2"
-    zone {
+    Zone {
       Pool.single(connectionString) { pool =>
         cleanup(pool)(tst, "howdy") { () =>
 
@@ -91,7 +92,7 @@ class MigrationTests extends munit.FunSuite, TestHarness:
   }
 
   test("incorrect states") {
-    zone {
+    Zone {
       val tst = "migration_test_1"
       Pool.single(connectionString) { pool =>
         cleanup(pool)(tst, "howdy") { () =>
@@ -125,7 +126,7 @@ class MigrationTests extends munit.FunSuite, TestHarness:
   }
 
   test("migration state is recorded") {
-    zone {
+    Zone {
       val tst = "migration_test_1"
       Pool.single(connectionString) { pool =>
         cleanup(pool)(tst, "howdy") { () =>
@@ -157,7 +158,7 @@ class MigrationTests extends munit.FunSuite, TestHarness:
   }
 
   test("migration is aborted entirely if one step fails") {
-    zone {
+    Zone {
       val tst = "migration_test_1"
       Pool.single(connectionString) { pool =>
         cleanup(pool)(tst, "howdy") { () =>
@@ -187,7 +188,7 @@ class MigrationTests extends munit.FunSuite, TestHarness:
   }
 
   test("partial migration is aborted if 1 step failed") {
-    zone {
+    Zone {
       val tst = "migration_test_1"
       Pool.single(connectionString) { pool =>
         cleanup(pool)(tst, "howdy") { () =>
