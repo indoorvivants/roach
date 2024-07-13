@@ -65,17 +65,14 @@ import roach.codecs.*
 val connectionString =
   "postgresql://postgres:mysecretpassword@localhost:5432/postgres"
 
-Zone { implicit z =>
-  Pool.single(connectionString) { pool => 
-    pool.withLease {
+Zone:
+  Pool.single(connectionString): pool => 
+    pool.withLease:
        sql"select typname, typisdefined from pg_type".all(name ~ bool).foreach(println)
 
        // with parameters now
        val oid: Option[Int] = 
           sql"select oid::int4 from pg_type where typname = $varchar".one("bool", int4)
-    }
-  }
-}
 ```
 
 ### `sql"..."` interpolator
