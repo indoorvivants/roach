@@ -8,7 +8,7 @@ val Versions = new {
 
   val circe = "0.14.9"
 
-  val munit = "1.0.0"
+  val munit = "1.0.2"
 
   val upickle = "3.3.1"
 }
