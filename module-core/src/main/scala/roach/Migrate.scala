@@ -5,7 +5,7 @@ import scalanative.unsafe.Zone
 object Migrate:
   def all(pool: Pool, tableName: String = defaultTableName)(
       files: ResourceFile*
-  ): MigrationResult = Zone: 
+  ): MigrationResult = Zone:
     pool.withLease(createTable(tableName))
 
     var rollback = false
