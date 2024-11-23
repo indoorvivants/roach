@@ -39,6 +39,27 @@ trait ValueCodec[T] extends Codec[T]:
 
 end ValueCodec
 
+private[roach] class AutoTupledCodec[A](a: Codec[A])
+    extends Codec[A *: EmptyTuple]:
+
+  def accepts(offset: Int) = a.accepts(offset)
+
+  def length = a.length
+
+  def decode(get: Int => CString, isNull: Int => Boolean)(using
+      Zone
+  ): Tuple1[A] =
+    val left = a.decode(get, isNull)
+
+    Tuple1(left)
+
+  override def encode(value: A *: EmptyTuple) =
+    a.encode(value._1)
+
+  override def toString() =
+    s"AutoTupledCodec[$a]"
+end AutoTupledCodec
+
 private[roach] class TupleCodec[A, B](a: Codec[A], b: Codec[B])
     extends Codec[(A, B)]:
   def accepts(offset: Int) =
@@ -69,24 +90,25 @@ private[roach] class TupleCodec[A, B](a: Codec[A], b: Codec[B])
 end TupleCodec
 
 private[roach] class AppendCodec[A <: Tuple, B](a: Codec[A], b: Codec[B])
-    extends Codec[Tuple.Append[A, B]]:
-
+    extends Codec[Tuple.Concat[A, (B *: EmptyTuple)]]:
+  type T = Tuple.Concat[A, (B *: EmptyTuple)]
   def accepts(offset: Int) =
     if offset < a.length then a.accepts(offset)
     else b.accepts(offset - a.length)
 
   def length = a.length + b.length
 
-  def decode(get: Int => CString, isNull: Int => Boolean)(using Zone): Tuple.Append[A, B]=
+  def decode(get: Int => CString, isNull: Int => Boolean)(using Zone): T =
     val left = a.decode(get, isNull)
     val right = b.decode(
       (i: Int) => get(i + a.length),
       (i: Int) => isNull(i + a.length)
     )
-    left :* right
+    left ++ (right *: EmptyTuple)
 
-  def encode(value: Tuple.Append[A, B]) =
-    val (left, right) = value.splitAt(a.length).asInstanceOf[(A, Tuple1[B])]
+  def encode(value: T) =
+    val (left, right) =
+      value.splitAt(value.size - 1).asInstanceOf[(A, B *: EmptyTuple)]
     val leftEncode = a.encode(left)
     val rightEncode = b.encode(right._1)
 
@@ -96,6 +118,7 @@ private[roach] class AppendCodec[A <: Tuple, B](a: Codec[A], b: Codec[B])
 
   override def toString() =
     s"AppendCodec[$a, $b]"
+
 end AppendCodec
 
 private[roach] class CombineCodec[A <: Tuple, B <: Tuple](
@@ -147,11 +170,15 @@ object Codec:
         def encode(value: T) =
           d.encode(iso.invert(value))
 
+        override def toString(): String = s"IsoCodec[$d, $iso]"
+
   extension [A](d: Codec[A])
     inline def ~[B](
         other: Codec[B]
     )(using NotGiven[B <:< Tuple]): Codec[(A, B)] =
-      CombineCodec(d, other)
+      TupleCodec(d, other)
+    // AppendCodec(AutoTupledCodec(d), other)
+
   end extension
 
   def stringLike[A](
@@ -167,7 +194,7 @@ object Codec:
       def encode(value: A) =
         _ => toCString(g(value))
 
-      override def toString() = s"ValueCodec[$accept]"
+      override def toString() = s"$accept"
 
 end Codec
 
@@ -183,3 +210,6 @@ object Iso:
       mir.fromProduct(a)
     def invert(a: A) =
       Tuple.fromProduct(a.asInstanceOf[Product]).asInstanceOf[X]
+
+    override def toString(): String = "Iso[" + mir.toString + "]"
+end Iso

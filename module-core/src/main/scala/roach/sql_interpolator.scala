@@ -96,10 +96,6 @@ private[roach] object MacroImpl:
       sb.result
     }
 
-    // REAL: "a" -> Int, "a" -> Int, Int, "b" -> String, Short, "b" -> String, "a" -> Int
-    // USER: "a" -> Int, Int, "b" -> String, Short, String
-    // mapping: 0 0 1 2 3 2 0
-
     codecs match
       case Nil => '{ Query($queryString) }
       case '{ $e: Codec[t] } :: Nil =>
@@ -142,7 +138,6 @@ private[roach] object MacroImpl:
 
         originalCodecs.zipWithIndex.foreach: (codec, idx) =>
           val mapTo = mapping(idx)
-          // println(s"Mapping ${codec.show} from $idx to $mapTo")
           compressedCodecs(mapTo) = codec
 
         val remap = Expr(
@@ -151,31 +146,24 @@ private[roach] object MacroImpl:
             .groupMapReduce(_._2)(s => List(s._1))(_ ++ _)
         )
         val map = Expr(mapping)
-        // quotes.reflect.report.info(
-        //   enc.result().toString + "-->" +
-        //     mapping.toString + "-->" +
-        //     originalCodecs.toList
-        //       .map(_.show)
-        //       .toString() + " --> " + compressedCodecs.toList
-        //       .map(_.show)
-        //       .toString() + " --> " + remap.show
-        // )
+        def combineCodecs(codecs: List[Expr[Any]]): Expr[Any] =
+          codecs match
+            case head :: Nil =>
+              head
+            case '{ $h: Codec[t] } :: '{ $r: Codec[t1] } :: rest =>
+              rest.foldLeft[Expr[Any]]('{ TupleCodec($h, $r) }):
+                case ('{ $acc: TupleCodec[a, z] }, '{ $next: Codec[t] }) =>
+                  '{ AppendCodec($acc, $next) }
+                case ('{ $acc: AppendCodec[a, z] }, '{ $next: Codec[t] }) =>
+                  '{ AppendCodec($acc, $next) }
+                case (other, next) =>
+                  quotes.reflect.report.errorAndAbort(other.show)
 
-        // val remappingFunction
+        end combineCodecs
 
-        // quotes.reflect.report.info(mapping.result().toString())
-        // quotes.reflect.report.info(seenAt.toString())
-        // quotes.reflect.report.info(enc.result().toString() + " -- " + mapping)
+        val original = combineCodecs(codecs)
 
-        val original = codecs.reduceLeft[Expr[Any]] {
-          case ('{ $e: Codec[t] }, '{ $e1: Codec[t1] }) =>
-            '{ $e *: $e1 }
-        }
-
-        val userSupplied = compressedCodecs.reduceLeft[Expr[Any]] {
-          case ('{ $e: Codec[t] }, '{ $e1: Codec[t1] }) =>
-            '{ $e ~ $e1) }
-        }
+        val userSupplied = combineCodecs(compressedCodecs.toList)
 
         (userSupplied, original) match
           case ('{ $e: Codec[userSuppliedT] }, '{ $e1: Codec[positionalT] }) =>
@@ -187,10 +175,12 @@ private[roach] object MacroImpl:
                 while start < usTuple.length do
                   val mapTo = $remap(start)
                   mapTo.foreach: idx =>
-                    positional(idx) = usTuple(idx)
+                    positional(idx) = usTuple(start)
                   start += 1
 
                 Tuple.fromArray(positional).asInstanceOf[positionalT]
+              end transform
+
               Query.applyTransformed[positionalT, userSuppliedT](
                 $queryString,
                 $e1,
