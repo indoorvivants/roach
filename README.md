@@ -90,6 +90,15 @@ def example(using Database, Zone) =
   sql"select count(*) from my_table".count()
   sql"select count(*) from my_table where x = $int4 and y = $text".count(25 -> "hello")
 
+  // Label codecs for clarity
+  val id = text.label["id"]
+  val name = text.label["name"]
+
+  sql"select count(*) from my_table where id = $id or name = $name or age = $int4".one(
+    ("id" -> "id_1", "name" -> "tony", 50),  
+    int4
+  )
+
   case class Data(key: Int, value: String)
   val rc = (int4 ~ text).as[Data]
   val tableName = "my_table"
@@ -118,7 +127,7 @@ def example_failure(using Database, Zone) =
   sql"select count(*) from my_table where x = $int4 and y = $text".count("hello" -> 25)
 ```
 
-`sql` interpolator produces a `Query`, so you can use it as described in the previous section
+`sql` interpolator produces a `Query`, so you can use it as described in the previous section.
 
 ### Fragments
 
