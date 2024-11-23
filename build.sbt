@@ -1,3 +1,4 @@
+import scala.scalanative.build.SourceLevelDebuggingConfig
 import bindgen.plugin.BindgenMode
 import java.nio.file.Paths
 
@@ -32,7 +33,7 @@ lazy val core =
     )
     .settings(common)
     .settings(
-      Test / nativeConfig ~= (_.withEmbedResources(true)),
+      Test / nativeConfig ~= (_.withEmbedResources(true).withSourceLevelDebuggingConfig(SourceLevelDebuggingConfig.enabled)),
       Compile / bindgenBindings += {
         val configurator = vcpkgConfigurator.value
 
