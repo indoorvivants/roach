@@ -18,11 +18,30 @@ class SqlInterpolatorTests extends munit.FunSuite, TestHarness:
     Zone {
       withDB {
         val fr1 = Fragment("key,value")
-        val q = sql"select $fr1 from $tableName where key = 25".all(int4 ~ text)
+        val b = sql"select $text, $int2 from table"
+
+        // type T = ("label1", Int) *: ("label2", Int) *: String *: Short *: EmptyTuple
+        locally:
+          val a = int4.label["a"]
+          val b = text.label["b"]
+
+          val ql = sql"""select * from posts 
+            where author_id = $a 
+            or repost_author_id = $a 
+            or x = $int4 
+            or b = $b
+            or x = $int2
+            or z = $b
+            or a = $a
+            """
+
+        // ql.count(("label1" -> 25, "label2" -> 50, "hello", 25))
+
+        val q = sql"select $fr1 from $tableName where key = 25".all(int4 *: text)
 
         assertEquals(q, Vector(25 -> "hello"))
 
-        val fr2 = fr1.applied(int4 ~ text)
+        val fr2 = fr1.applied(int4 *: text)
 
         val q1 =
           sql"insert into $tableName(${fr2.sql}) values ($fr2) returning key"
@@ -39,7 +58,7 @@ class SqlInterpolatorTests extends munit.FunSuite, TestHarness:
       withDB {
 
         case class Data(key: Int, value: String)
-        val rc = (int4 ~ text).as[Data]
+        val rc = (int4 *: text).as[Data]
         sql"insert into $tableName values ($rc)".exec(Data(150, "howdies"))
 
         assertEquals(

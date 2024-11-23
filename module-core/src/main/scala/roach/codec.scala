@@ -39,24 +39,53 @@ trait ValueCodec[T] extends Codec[T]:
 
 end ValueCodec
 
-private[roach] class AppendCodec[A <: Tuple, B](a: Codec[A], b: Codec[B])
-    extends Codec[Tuple.Concat[A, (B *: EmptyTuple)]]:
-  type T = Tuple.Concat[A, (B *: EmptyTuple)]
+private[roach] class TupleCodec[A, B](a: Codec[A], b: Codec[B])
+    extends Codec[(A, B)]:
   def accepts(offset: Int) =
     if offset < a.length then a.accepts(offset)
     else b.accepts(offset - a.length)
 
   def length = a.length + b.length
 
-  def decode(get: Int => CString, isNull: Int => Boolean)(using Zone): T =
+  def decode(get: Int => CString, isNull: Int => Boolean)(using Zone): (A, B) =
     val left = a.decode(get, isNull)
     val right = b.decode(
       (i: Int) => get(i + a.length),
       (i: Int) => isNull(i + a.length)
     )
-    left ++ (right *: EmptyTuple)
+    (left, right)
 
-  def encode(value: T) =
+  def encode(value: (A, B)) =
+    val (left, right) = value
+    val leftEncode = a.encode(left)
+    val rightEncode = b.encode(right)
+
+    (offset: Int) =>
+      if offset + 1 > a.length then rightEncode(offset - a.length)
+      else leftEncode(offset)
+
+  override def toString() =
+    s"TupleCodec[$a, $b]"
+end TupleCodec
+
+private[roach] class AppendCodec[A <: Tuple, B](a: Codec[A], b: Codec[B])
+    extends Codec[Tuple.Append[A, B]]:
+
+  def accepts(offset: Int) =
+    if offset < a.length then a.accepts(offset)
+    else b.accepts(offset - a.length)
+
+  def length = a.length + b.length
+
+  def decode(get: Int => CString, isNull: Int => Boolean)(using Zone): Tuple.Append[A, B]=
+    val left = a.decode(get, isNull)
+    val right = b.decode(
+      (i: Int) => get(i + a.length),
+      (i: Int) => isNull(i + a.length)
+    )
+    left :* right
+
+  def encode(value: Tuple.Append[A, B]) =
     val (left, right) = value.splitAt(a.length).asInstanceOf[(A, Tuple1[B])]
     val leftEncode = a.encode(left)
     val rightEncode = b.encode(right._1)
@@ -67,12 +96,13 @@ private[roach] class AppendCodec[A <: Tuple, B](a: Codec[A], b: Codec[B])
 
   override def toString() =
     s"AppendCodec[$a, $b]"
-
 end AppendCodec
 
-private[roach] class CombineCodec[A, B](a: Codec[A], b: Codec[B])
-    extends Codec[(A, B)]:
-  type T = (A, B)
+private[roach] class CombineCodec[A <: Tuple, B <: Tuple](
+    a: Codec[A],
+    b: Codec[B]
+) extends Codec[Tuple.Concat[A, B]]:
+  type T = Tuple.Concat[A, B]
   def accepts(offset: Int) =
     if offset < a.length then a.accepts(offset)
     else b.accepts(offset - a.length)
@@ -83,11 +113,11 @@ private[roach] class CombineCodec[A, B](a: Codec[A], b: Codec[B])
     val left = a.decode(get, isNull)
     val right =
       b.decode((i: Int) => get(i + a.length), (i: Int) => isNull(i + a.length))
-    (left, right)
+    left ++ right
 
   def encode(value: T) =
-    val leftEncode = a.encode(value._1)
-    val rightEncode = b.encode(value._2)
+    val leftEncode = a.encode(value.take(a.length).asInstanceOf[A])
+    val rightEncode = b.encode(value.drop(a.length).asInstanceOf[B])
 
     (offset: Int) =>
       if offset + 1 > a.length then rightEncode(offset - a.length)

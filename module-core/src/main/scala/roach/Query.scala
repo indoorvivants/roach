@@ -3,6 +3,9 @@ package roach
 import scala.scalanative.unsafe.Zone
 import scala.util.NotGiven
 
+// class Query:
+//   def all[T](using NotGiven[T])
+
 opaque type Query[T] = T => (Database, Zone) ?=> roach.Result
 object Query:
   def apply[T](q: String, codecIn: Codec[T]): Query[T] =
@@ -10,6 +13,13 @@ object Query:
 
   def apply(q: String): Query[Unit] =
     data => (db, z) ?=> db.execute(q).getOrThrow
+
+  private[roach] def applyTransformed[Positional, UserSupplied](
+      q: String,
+      codecIn: Codec[Positional],
+      transform: UserSupplied => Positional
+  ): Query[UserSupplied] =
+    data => (db, z) ?=> db.executeParams(q, codecIn, transform(data)).getOrThrow
 
   extension [T](q: Query[T])(using
       NotGiven[T =:= Unit]
