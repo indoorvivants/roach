@@ -9,7 +9,7 @@ val Versions = new {
 
   val circe = "0.14.9"
 
-  val munit = "1.0.0"
+  val munit = "1.0.3"
 
   val upickle = "4.0.2"
 }
@@ -33,7 +33,8 @@ lazy val core =
     )
     .settings(common)
     .settings(
-      Test / nativeConfig ~= (_.withEmbedResources(true).withSourceLevelDebuggingConfig(SourceLevelDebuggingConfig.enabled)),
+      Test / nativeConfig ~= (_.withEmbedResources(true)
+        .withSourceLevelDebuggingConfig(SourceLevelDebuggingConfig.enabled)),
       Compile / bindgenBindings += {
         val configurator = vcpkgConfigurator.value
 
