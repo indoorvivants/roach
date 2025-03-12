@@ -6,26 +6,25 @@ on:
   pull_request:
     branches: ["*"]
 
-env:
-  PG_VERSION: REL_12_7
-  SBTN: 'sbt --client'
 
 jobs:
   build:
     name: CI
     strategy:
       fail-fast: false
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - uses: actions/setup-java@v3
+      - uses: actions/setup-java@v4
         with:
           distribution: 'temurin' 
-          java-version: '17'
+          java-version: '21'
           cache: sbt
+
+      - uses: sbt/setup-sbt@v1
 
       - name: Cache vcpkg
         uses: actions/cache@v3
@@ -38,20 +37,10 @@ jobs:
 
       - uses: rui314/setup-mold@v1
 
-      - name: Setup for Scala Native
-        run: |
-          echo "It's a Linux"
-          sudo apt update
-          sudo apt install lsb-release wget software-properties-common
-          wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add -
-          sudo add-apt-repository "deb http://apt.llvm.org/focal/     llvm-toolchain-focal-13   main"
-          sudo apt-get update 
-          sudo apt-get install clang-13 lldb-13 libclang-13-dev llvm-13-dev
-
       - name: Setup Postgres
         run: |
           set -e
-          docker run -p 5432:5432 -e POSTGRES_PASSWORD=mysecretpassword -d postgres
+          docker run -p 5432:5432 -e POSTGRES_PASSWORD=mysecretpassword -d postgres:16.8
 
       - name: Tests 
         run: sbt test 
