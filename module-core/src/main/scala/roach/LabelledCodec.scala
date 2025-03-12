@@ -6,7 +6,8 @@ import scala.ContextFunction1
 
 import scala.scalanative.unsafe.Zone
 
-class LabelledCodec[L <: Singleton & String, T](lab: L, c: Codec[T]) extends Codec[(L, T)]:
+class LabelledCodec[L <: Singleton & String, T](lab: L, c: Codec[T])
+    extends Codec[(L, T)]:
   override def length: Int = c.length
 
   override def decode(get: Int => CString, isNull: Int => Boolean)(using

@@ -26,7 +26,12 @@ object Pool:
           toCString(connString),
           noticeProcessor
         )
-      else new SingleThreadedSlotPool(Slot.Empty, toCString(connString), noticeProcessor)
+      else
+        new SingleThreadedSlotPool(
+          Slot.Empty,
+          toCString(connString),
+          noticeProcessor
+        )
 
     try
       f(pool)

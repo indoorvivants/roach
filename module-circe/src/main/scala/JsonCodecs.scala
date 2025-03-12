@@ -2,7 +2,7 @@ package roach.circe
 
 import io.circe.parser.*
 import roach.codecs
-import io.circe.{Codec as CirceCodec}
+import io.circe.Codec as CirceCodec
 import io.circe.syntax.*
 import io.circe.Json
 

@@ -3,7 +3,7 @@ package roach
 import libpq.types.Oid
 import scala.scalanative.unsigned.*
 import scala.collection.immutable.IntMap
-import java.{util as ju}
+import java.util as ju
 
 trait OidMapping:
   self =>
