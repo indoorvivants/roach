@@ -171,6 +171,7 @@ object Codec:
           d.encode(iso.invert(value))
 
         override def toString(): String = s"IsoCodec[$d, $iso]"
+  end extension
 
   extension [A](d: Codec[A])
     inline def ~[B](
