@@ -97,7 +97,7 @@ private[roach] object MacroImpl:
     }
 
     codecs match
-      case Nil => '{ Query($queryString) }
+      case Nil                      => '{ Query($queryString) }
       case '{ $e: Codec[t] } :: Nil =>
         '{ Query[t]($queryString, $e) }
       case codecs @ (h :: rest) =>
