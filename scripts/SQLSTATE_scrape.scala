@@ -1,6 +1,6 @@
 //> using lib "org.scala-lang.modules::scala-xml:2.1.0"
 //> using lib "com.indoorvivants::rendition:0.0.3"
-//> using lib "com.lihaoyi::os-lib:0.9.3"
+//> using lib "com.lihaoyi::os-lib:0.11.6"
 
 import scala.xml.*
 
