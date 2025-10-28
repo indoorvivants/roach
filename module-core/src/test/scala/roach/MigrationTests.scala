@@ -9,7 +9,6 @@ class MigrationTests extends munit.FunSuite, TestHarness:
     Zone {
       Pool.single(connectionString) { pool =>
         cleanup(pool)("migration_test_1", "howdy") { () =>
-
           val result = Migrate.all(pool, tableName = "migration_test_1")(
             ResourceFile("/test_1.1.sql"),
             ResourceFile("/test_1.2.sql"),
@@ -45,7 +44,6 @@ class MigrationTests extends munit.FunSuite, TestHarness:
     Zone {
       Pool.single(connectionString) { pool =>
         cleanup(pool)(tst, "howdy") { () =>
-
           Migrate.all(pool, tableName = tst)(
             ResourceFile("/test_1.1.sql"),
             ResourceFile("/test_1.2.sql"),

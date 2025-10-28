@@ -14,7 +14,6 @@ object Migrate:
     val present = Vector.newBuilder[String]
 
     pool.withLease { db ?=>
-
       db.command("BEGIN")
 
       try
