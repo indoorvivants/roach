@@ -11,7 +11,7 @@ val Versions = new {
 
   val munit = "1.1.1"
 
-  val upickle = "4.4.0"
+  val upickle = "4.4.1"
 }
 
 import bindgen.interface.*
